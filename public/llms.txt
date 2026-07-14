@@ -41,7 +41,7 @@ Tagline: "Be your own indexer."
 
 ## Install
 
-- Shell: `curl -fsSL https://nuthatch.dev/install.sh | sh`
+- Shell: `curl -fsSL https://nuthatch-indexer.com/install.sh | sh`
 - Cargo: `cargo install nuthatch`
 - Homebrew: `brew install nuthatch`
 - Docker is only needed for scaled mode (Postgres + DataFusion), not embedded mode.
@@ -59,10 +59,10 @@ commit, share, and re-run (`nuthatch init --from <git-url>`).
 
 ## Links
 
-- Website: https://nuthatch.dev/
-- Install guide: https://nuthatch.dev/install
-- Worked example (subgraph to nest): https://nuthatch.dev/example
-- Manifesto: https://nuthatch.dev/manifesto
+- Website: https://nuthatch-indexer.com/
+- Install guide: https://nuthatch-indexer.com/install
+- Worked example (subgraph to nest): https://nuthatch-indexer.com/example
+- Manifesto: https://nuthatch-indexer.com/manifesto
 - Source and docs: https://github.com/cargopete/nuthatch
-- Full description for models: https://nuthatch.dev/llms-full.txt
+- Full description for models: https://nuthatch-indexer.com/llms-full.txt
 - Licence: AGPL-3.0-only

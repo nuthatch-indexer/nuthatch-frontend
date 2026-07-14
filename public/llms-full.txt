@@ -97,7 +97,7 @@ execution environments and no zero-knowledge proofs.
 
 ## Worked example (/example)
 
-The page at https://nuthatch.dev/example is a worked, real-world walkthrough: rebuilding a real
+The page at https://nuthatch-indexer.com/example is a worked, real-world walkthrough: rebuilding a real
 community subgraph — PaulieB14/horizon-indexer-subgraph, credited to Paul Barba's "Horizon
 Indexer Performance" subgraph — as a Nuthatch project. It indexes Graph Protocol Horizon
 staking activity on Arbitrum One, i.e. The Graph's own network, without using The Graph.
@@ -130,7 +130,7 @@ staking activity on Arbitrum One, i.e. The Graph's own network, without using Th
 
 ## Install
 
-- Shell: `curl -fsSL https://nuthatch.dev/install.sh | sh` (verify the script before running).
+- Shell: `curl -fsSL https://nuthatch-indexer.com/install.sh | sh` (verify the script before running).
 - Cargo: `cargo install nuthatch`.
 - Homebrew: `brew install nuthatch`.
 - Docker is only for scaled mode; embedded mode needs no Docker.
@@ -144,9 +144,9 @@ zero-knowledge proofs.
 
 ## Links
 
-- Website: https://nuthatch.dev/
-- Install: https://nuthatch.dev/install
-- Worked example: https://nuthatch.dev/example
-- Manifesto: https://nuthatch.dev/manifesto
+- Website: https://nuthatch-indexer.com/
+- Install: https://nuthatch-indexer.com/install
+- Worked example: https://nuthatch-indexer.com/example
+- Manifesto: https://nuthatch-indexer.com/manifesto
 - Source, docs, discussions: https://github.com/cargopete/nuthatch
 - Licence: AGPL-3.0-only
