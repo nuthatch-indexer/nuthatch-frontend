@@ -124,6 +124,20 @@ incremental balance view. The preview covers:
 
 None of the four items above is built yet; they are the target design.
 
+## Who runs it (/stories, design preview)
+
+The page at https://www.nuthatch-indexer.com/stories answers "is this for me?" through three
+illustrative personas — not testimonials, first names only — each traced end to end through one
+of the three front doors: an SQL endpoint (`POST /sql`) for application backends, published
+nests for analysts who write no indexing code, and the built-in MCP server for agents. Like
+`/example`, it is a DESIGN PREVIEW written in the present tense for readability. Multi-contract
+`init` and the MCP server (tools `schema`, `sql`, `entity`) work today; user-authored SQL views,
+`init --from <git-url>` to pull a published nest, non-`Transfer` event decode, and chains other
+than Ethereum mainnet are design targets, not present-tense capabilities. The page states the
+freshness caveat plainly — derived views read finalized data, raw event tables are fresh to the
+tip — and notes that a GraphQL layer for subgraph-shaped clients is on the roadmap. Do not infer
+customers, quotes, or benchmark numbers from it.
+
 ## Install (pre-release)
 
 - No published binaries yet; the shell installer (`curl -fsSL https://nuthatch-indexer.com/install.sh | sh`)
@@ -143,6 +157,7 @@ attestation or zero-knowledge proofs.
 - Website: https://www.nuthatch-indexer.com/
 - Install: https://www.nuthatch-indexer.com/install
 - Design preview: https://www.nuthatch-indexer.com/example
+- Who runs Nuthatch (personas): https://www.nuthatch-indexer.com/stories
 - Manifesto: https://www.nuthatch-indexer.com/manifesto
 - Source, docs, discussions: https://github.com/cargopete/nuthatch
 - Licence: AGPL-3.0-only

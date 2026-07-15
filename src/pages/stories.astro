@@ -1,0 +1,184 @@
+---
+import Layout from '../layouts/Layout.astro';
+import CodeCard from '../components/CodeCard.astro';
+
+// Story 1 — a dapp backend. Multi-contract init works today; Arbitrum and
+// non-Transfer decode are design targets (this page is a design preview).
+const initCmd = `nuthatch init --chain arbitrum-one \\
+  0x1F98431c8aD98523631AE4a59f267346ea31F984 \\
+  0xC36442b4a4522E871399CD717aBDD847Ab11FE88`;
+
+const positionsView = `create view positions as
+select user_address,
+       sum(case when kind = 'deposit'  then amount else 0 end)
+       - sum(case when kind = 'withdraw' then amount else 0 end) as net_supplied
+from (
+  select user_address, amount, 'deposit'  as kind from deposit
+  union all
+  select user_address, amount, 'withdraw' as kind from withdraw
+)
+group by user_address;`;
+
+const sqlCurl = `curl -s http://127.0.0.1:8288/sql \\
+  -H 'content-type: application/json' \\
+  -d '{"query": "select net_supplied from positions where user_address = $1", "params": ["0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D"]}'`;
+
+// Story 2 — a published nest. init --from is a design target.
+const initFrom = `nuthatch init --from https://github.com/example/horizon-nest`;
+
+const indexersQuery = `select * from indexers order by total_rewards_earned desc limit 20;`;
+
+// Story 3 — a local agent. The MCP server and its schema/sql tools work today.
+const mcpConfig = `{
+  "mcpServers": {
+    "nuthatch": { "command": "nuthatch", "args": ["mcp"] }
+  }
+}`;
+---
+<Layout
+  path="/stories"
+  title="Who runs Nuthatch — Nuthatch"
+  description="Three workflows through Nuthatch's three front doors: an SQL endpoint for app backends, published nests for analysts, and a built-in MCP server for agents. Design-preview workflows; Nuthatch is pre-release."
+>
+  <section class="page">
+    <article class="wrap narrow prose">
+      <p class="section-label">Stories</p>
+      <h1>Who runs Nuthatch</h1>
+
+      <p>
+        Nuthatch has three front doors: an SQL endpoint for application backends, published
+        nests for people who want data without writing indexing code, and a built-in MCP
+        server for agents. Same binary, same data, one process on your own hardware.
+      </p>
+      <p class="illus">Illustrative workflows, not customer stories — Nuthatch is pre-release.</p>
+
+      <p class="preview-note">
+        <strong>These workflows describe the product as designed.</strong> They are written
+        in the present tense for readability. Today the binary indexes ERC-20
+        <code>Transfer</code> events across one or more contracts on a single chain, maintains
+        a balance view incrementally, and serves read-only SQL and MCP; multi-contract
+        <code>init</code> and the MCP server work now. User-authored views,
+        <code>init --from</code>, non-Transfer decode, and other chains are design targets —
+        see the <a href="/install">quickstart</a> for what runs today.
+      </p>
+
+      <!-- STORY 1 -->
+      <h2>A dapp backend</h2>
+      <p>
+        Maya's three-person team runs a lending protocol on Arbitrum. The frontend needs user
+        positions, borrow history, and a few protocol-wide stats — the read side of the app,
+        the part a managed indexer usually bills for.
+      </p>
+      <p>
+        She points one command at the protocol's contracts and runs it on a €15 VPS. Nothing
+        else to provision: no Postgres, no queue, no second box.
+      </p>
+      <CodeCard code={initCmd} lang="bash" label="one init, every contract" />
+      <p>
+        Every event in those ABIs becomes a queryable table as the backfill streams through
+        history, so she can read the raw layer before modelling anything. The positions her
+        frontend needs are one declarative view over deposits and withdrawals:
+      </p>
+      <CodeCard code={positionsView} lang="sql" label="views/positions.sql" />
+      <p>
+        Her API route calls <code>POST /sql</code> the same way it would call Postgres — one
+        read-only endpoint on localhost, no driver to install, no connection pool to babysit:
+      </p>
+      <CodeCard code={sqlCurl} lang="bash" label="the frontend reads it like a database" />
+      <p>
+        When Arbitrum reorgs, the affected rows retract and anything derived from them corrects
+        itself; the frontend never sees the wobble.
+      </p>
+      <p>
+        What she stopped doing: paying per entity for her own application's data, and trusting a
+        third party's uptime for a read path she now runs herself.
+      </p>
+
+      <hr class="divider seg" />
+
+      <!-- STORY 2 -->
+      <h2>A dashboard, no indexing code</h2>
+      <p>
+        Petar delegates GRT and wants one thing: to see which Graph Horizon indexers actually
+        earn. He does not want to write handlers, and he does not need to.
+      </p>
+      <!-- TODO: link horizon-nest when published -->
+      <p>
+        He pulls a published nest — contracts, vendored ABIs, and derived views all included —
+        and runs it against his own node. He wrote no indexing code; he ran someone else's
+        definition:
+      </p>
+      <CodeCard code={initFrom} lang="bash" label="run a published nest" />
+      <p>
+        From there the data is just SQL. One query drives a Grafana panel, or a bare HTML page
+        with a single <code>fetch</code>:
+      </p>
+      <CodeCard code={indexersQuery} lang="sql" label="via /sql" />
+      <p>
+        The point is that a nest is a shareable indexing <em>definition</em>, not a hosted feed:
+        he ran it on his own hardware and can read every line of what produced the numbers.
+      </p>
+      <p class="note">
+        Derived views read finalized data; the raw event tables are fresh to the tip. A
+        dashboard built on views trails the chain head by finality — the honest trade for
+        numbers that never retract under you.
+      </p>
+
+      <hr class="divider seg" />
+
+      <!-- STORY 3 -->
+      <h2>An agent, locally</h2>
+      <p>
+        Dana builds a DeFi assistant. She wants it to answer questions about on-chain data
+        without shipping that data — or her users' questions — to anyone.
+      </p>
+      <p>She adds Nuthatch to the agent's MCP config. That is the whole integration:</p>
+      <CodeCard code={mcpConfig} lang="json" label=".mcp.json" />
+      <p>
+        The agent discovers the schema itself through the <code>schema</code> tool and composes
+        queries through the <code>sql</code> tool, so when her user types "which indexers grew
+        delegation fastest this month?" it writes the query rather than guessing the shape.
+      </p>
+      <p>
+        Nothing leaves the machine: no API key, no per-query bill, and it works offline against
+        the local instance.
+      </p>
+
+      <hr class="divider close-div" />
+      <p class="signoff">
+        The pattern across all three: nobody deployed to someone else's platform, nobody got an
+        API key, and nobody's story ends with a monthly invoice. To a frontend, Nuthatch looks
+        like a fast read-only database that fills itself from the chain and heals itself through
+        reorgs. GraphQL is on the roadmap for subgraph-shaped clients.
+      </p>
+      <p class="storylinks">
+        <a class="btn btn-primary" href="/install">Try the quickstart</a>
+        <a class="btn btn-ghost" href="/example">See the full example</a>
+      </p>
+    </article>
+  </section>
+</Layout>
+
+<style>
+  .page { padding-block: clamp(3rem, 6vw, 4.5rem) clamp(4rem, 9vw, 6.5rem); }
+  .prose h1 { margin-bottom: 1.4rem; line-height: 1.12; }
+  .prose h2 { margin-top: 2.6rem; margin-bottom: 1rem; font-size: 1.5rem; }
+  .prose p { color: var(--text-muted); font-size: 1.05rem; line-height: 1.72; margin-bottom: 1.3rem; }
+  .prose p:first-of-type { color: var(--text); }
+  .illus { font-size: 0.9rem !important; color: var(--text-faint) !important; margin-top: -0.4rem; }
+  .preview-note {
+    background: var(--pale-rust-bg); border: 1px solid var(--border);
+    border-left: 3px solid var(--rust); border-radius: var(--radius);
+    padding: 1rem 1.2rem; font-size: 0.95rem !important; color: var(--text-muted) !important;
+    margin-bottom: 1rem;
+  }
+  .preview-note strong { color: var(--text); }
+  .prose :global(.codecard) { margin-bottom: 1.4rem; }
+  .note { font-size: 0.92rem; color: var(--text-faint); }
+  .seg { margin-block: 2.6rem; }
+  .close-div { margin-block: 2.6rem 1.8rem; }
+  .signoff { color: var(--text) !important; }
+  .storylinks { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 0.4rem; }
+</style>
+</content>
+</invoke>

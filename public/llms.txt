@@ -71,11 +71,23 @@ declarative incremental views (reorgs retract; no rollback code), generated test
 over SQL, GraphQL, SSE, and MCP. This is the target design, not the current binary, which indexes
 a single contract's `Transfer` events with an incremental balance view.
 
+## Who runs it (design preview)
+
+`/stories` answers "is this for me?" through three illustrative personas (not testimonials),
+each mapped to one of the three front doors: an SQL endpoint for application backends,
+published nests for analysts who write no indexing code, and the built-in MCP server for
+agents. Like `/example`, it is written in the present tense for readability but describes the
+product as designed: multi-contract `init` and MCP work today, while user-authored views,
+`init --from`, non-`Transfer` decode, and chains other than mainnet are design targets. It
+notes that derived views read finalized data while raw event tables are fresh to the tip, and
+that a GraphQL layer for subgraph-shaped clients is on the roadmap.
+
 ## Links
 
 - Website: https://www.nuthatch-indexer.com/
 - Install guide: https://www.nuthatch-indexer.com/install
 - Design preview (subgraph to nest): https://www.nuthatch-indexer.com/example
+- Who runs Nuthatch (personas): https://www.nuthatch-indexer.com/stories
 - Manifesto: https://www.nuthatch-indexer.com/manifesto
 - Source and docs: https://github.com/cargopete/nuthatch
 - Full description for models: https://www.nuthatch-indexer.com/llms-full.txt
