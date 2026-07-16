@@ -149,23 +149,31 @@ RFC written in the repo, not yet started; not planned = a deliberate scope decis
 promised — order is.
 
 - Shipped: the embedded single-binary pipeline end to end (multi-contract ABI-driven decode of
-  every declared event, reorg-safe hot store, finality-sealed content-addressed Parquet, DuckDB
-  SQL, an i128 DBSP balance view with restart-replay, HTTP + an 8-tool offline MCP server); nests
-  (`init --from`, vendored ABIs + deploy blocks, schema versioning, `views/*.sql`, the
-  `nuthatch check` parity framework); Ethereum mainnet + Arbitrum One with finality as policy;
-  measured backfill throughput (~289 → 2,521 → 5,837 ev/s on public RPC, ~20× over baseline,
-  byte-identical segments); pure zero-capability WASM transforms; a CI RAM-budget gate with a
-  measured footprint (~37 MB single contract, ~58 MB three-contract 23-table nest, 2.8% of 2 GB).
-- In progress: reth ExEx wiring (RFC-0003, needs a synced node); the Horizon nest parity (RFC-0002);
-  remaining backfill work — adaptive chunking + own-node tier numbers (RFC-0004).
-- Planned: v0.1.0 release engineering (RFC-0005 — signed artifacts, real install.sh, crate, tap);
-  the compliance pack (RFC-0008); and deferred items marked "RFC to come" (scaled Postgres +
-  DataFusion mode, effectful transform worlds + signed manifests, a governed semantic layer + NL
-  queries, a GraphQL compatibility layer, IVM generalisation, multi-chain, factories/dynamic
-  discovery, a local admin UI + webhooks, wildcard indexing + open-lakehouse docs). RFC-0006/0007
-  (grants, launch) are process, not product.
-- Not planned: a token or decentralized-network features, telemetry of any kind, a
-  Kubernetes-first deployment.
+  every declared event, provenance/ergonomics columns — `block_hash`, `_seq`, `block_timestamp`,
+  `*_dec`/`*_overflow` — reorg-safe hot store, finality-sealed content-addressed Parquet, DuckDB
+  SQL over `/tables` + `/table/{name}`, an i128 DBSP balance view with restart-replay, HTTP + an
+  8-tool offline MCP server); nests (`init --from`, vendored ABIs + deploy blocks, schema
+  versioning, `views/*.sql` with empty-typed-view handling, the `nuthatch check` parity framework);
+  three chains (Ethereum mainnet + Arbitrum One + Base) with finality as policy; the complete
+  backfill work (RFC-0004: bench harness, seal-direct, pipelined fetching, adaptive chunker,
+  `dev --seal-direct`) measured at ~289 → 2,521 → 5,837 ev/s on public RPC (~20× over baseline,
+  byte-identical segments); the operator surface (Prometheus `/metrics`, `/sql` guards — timeout,
+  row cap, concurrency — graceful shutdown, a 0.x config-stability contract); pure zero-capability
+  WASM transforms; the tagged v0.1.0 release on crates.io with prebuilt binaries; a CI RAM-budget
+  gate with a measured footprint (~37 MB single contract, ~58 MB three-contract 23-table nest,
+  2.8% of 2 GB).
+- In progress: the Horizon nest parity fixtures against the deployed community subgraph (RFC-0002);
+  reth ExEx wiring (RFC-0003 — Source trait, library split, and bridge in and tested, rustc 1.95
+  satisfies both reth 2.4 and dbsp; needs a synced node).
+- Planned: the remaining v0.1.x release engineering (RFC-0005 — signed artifacts, a real
+  install.sh, a Homebrew tap, an OCI image); factory/dynamic contract discovery (RFC-0009); the
+  graph-network nest and Lodestar migration (RFC-0011); a local admin UI + webhooks (RFC-0010); the
+  compliance pack (RFC-0008 — pure list-snapshot screening, threshold/velocity flags, reproducible
+  `audit replay`); and deferred items marked "RFC to come" (scaled Postgres + DataFusion mode,
+  effectful transform worlds + signed manifests, a governed semantic layer + NL queries, a GraphQL
+  compatibility layer, IVM generalisation, wildcard indexing).
+- Not planned: a token or decentralized-network features, telemetry of any kind, a Kubernetes-first
+  deployment, and any gateway/auth/metering layer in the core.
 
 ## Install (pre-release)
 

@@ -86,12 +86,16 @@ that a GraphQL layer for subgraph-shaped clients is on the roadmap.
 
 `/roadmap` is generated from the source repo, not from marketing copy: the README's working-now
 table and progress log are the source of truth for what is shipped, and the numbered RFCs under
-`docs/rfcs/` for what is planned. It groups work as shipped (merged, tested, with a measured
-number where one exists), in progress (reth ExEx wiring RFC-0003, the Horizon nest RFC-0002,
-remaining backfill RFC-0004), planned (v0.1.0 release RFC-0005, the compliance pack RFC-0008, and
-deferred items marked "RFC to come"), and explicitly not planned (a token,
-telemetry, Kubernetes-first). It promises order, not dates, and defers to
-the README progress log when the two disagree.
+`docs/rfcs/` for what is planned. Shipped: the embedded pipeline end to end, nests, three chains
+(Ethereum mainnet + Arbitrum One + Base), the measured ~20× seal-direct/pipelined backfill
+(RFC-0004), the operator surface (`/metrics`, `/sql` guards, graceful shutdown), and the tagged
+v0.1.0 release on crates.io with prebuilt binaries. In progress: the Horizon nest parity fixtures
+(RFC-0002) and reth ExEx wiring (RFC-0003, needs a synced node). Planned: the remaining v0.1.x
+release engineering (RFC-0005), factory/dynamic discovery (RFC-0009), the graph-network nest and
+Lodestar migration (RFC-0011), a local admin UI + webhooks (RFC-0010), the compliance pack
+(RFC-0008), and deferred items marked "RFC to come". Not planned: a token or decentralized-network
+features, telemetry, a Kubernetes-first deployment, and any gateway/auth/metering layer in the
+core. It promises order, not dates, and defers to the README progress log when the two disagree.
 
 ## Links
 
