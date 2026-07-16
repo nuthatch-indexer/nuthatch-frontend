@@ -6,33 +6,47 @@
 
 Nuthatch indexes EVM chains on your own hardware. Embedded mode runs as a single static
 binary with no external services: no Postgres, no Docker, no IPFS. It is free and licensed
-AGPL-3.0. Status: pre-release. This file separates what the binary does today from the design
-targets, so a model does not present unbuilt features as present-tense fact.
+AGPL-3.0. Status: v0.1.0 (early 0.x software). This file separates what the binary does today
+from the design targets, so a model does not present unbuilt features as present-tense fact.
 
 Tagline: "Be your own indexer."
 
 ## What it does today
 
-- `nuthatch init 0xAddr --chain mainnet` resolves the ABI (Sourcify, then an Etherscan-class
-  API) and scaffolds a project: `nuthatch.toml`, `abi.json`, an `llms.txt`, and a Claude Code
-  skill. It does not yet generate schemas, views, handlers, or tests.
-- `nuthatch dev` polls logs over RPC (round-robin failover), decodes ERC-20 `Transfer` events,
-  stores them in an embedded hot store (redb), seals finalized ranges to content-addressed
-  Parquet, and serves a local HTTP API on 127.0.0.1:8288: `/entities`, `/entity/{id}`, `/sql`
-  (read-only DuckDB over sealed data), `/balances`, `/balance/{addr}`.
-- Balances are an incrementally-maintained view (DBSP); a reorg is a retraction.
-- `nuthatch transform <component.wasm>` runs a pure, capability-isolated WASM transform over a
-  batch (Arrow). `nuthatch mcp` serves the Model Context Protocol over stdio (tools: status,
-  schema, sql, entity, balance, top_balances), bridging offline to a running instance.
+- `nuthatch init 0xAddr [0xAddr…] --chain <mainnet|arbitrum-one|base>` resolves each contract's
+  ABI (Sourcify, then an Etherscan-class API; EIP-1967/legacy-OZ proxies resolved) and scaffolds a
+  multi-contract nest: `nuthatch.toml`, `abis/`, a `schema.json`, an `llms.txt`, and a Claude Code
+  skill. It does not yet generate views, handlers, or tests from the ABI.
+- `nuthatch dev` polls logs over RPC (round-robin failover, adaptive `getLogs` chunking), decodes
+  every declared event of every contract (topic0 registry → one table per `{alias}__{event}`),
+  stores rows in an embedded hot store (redb), seals finalized ranges to content-addressed Parquet
+  (hot store pruned), and serves a local HTTP API on 127.0.0.1:8288: `/tables`, `/table/{name}`
+  (hot+cold merged), `/sql` (read-only DuckDB over sealed data), `/entities`, `/entity/{id}`,
+  `/balances`, `/balance/{addr}`, and `/metrics` (Prometheus). Every row carries provenance columns
+  (`block_hash`, `_seq`, `block_timestamp`) and `*_dec`/`*_overflow` siblings for big integers.
+- A nest is a git repo: `nuthatch init --from <git-url | ./dir>` runs a published nest (vendored
+  ABIs + deployment blocks, schema-version guarded); `views/*.sql` add derived entities;
+  `nuthatch check` runs `checks/*.sql` against recorded fixtures (hermetic parity/invariant framework).
+- Balances are an incrementally-maintained view (DBSP): i128 base units serialised as decimal
+  strings, a reorg is a retraction, and the view replays from stored facts on restart.
+- `dev --seal-direct` runs a ~20× faster phased cold-start backfill (measured ~289 → ~5,837 ev/s on
+  public RPC, byte-identical segments). Operator surface: `/metrics`, `/sql` guards (timeout, row
+  cap, concurrency), graceful shutdown on SIGTERM.
+- `nuthatch transform <component.wasm>` runs a pure, zero-capability WASM transform over an Arrow
+  batch. `nuthatch mcp` serves the Model Context Protocol over stdio (8 tools: status, schema,
+  tables, table, sql, entity, balance, top_balances), bridging offline to a running instance.
+- Chains: Ethereum mainnet, Arbitrum One (42161), and Base (8453), with finality as a per-chain
+  policy. Measured footprint: ~37 MB single contract, ~58 MB three-contract 23-table nest (2.8% of
+  the 2 GB budget; CI fails above 256 MB).
 
 ## Design targets (not built yet)
 
-- Under 2 minutes from `init` to first query; at most 2 GB RAM for a single chain (a CI budget
-  enforces a 256 MB ceiling in tests today).
-- reth ExEx tip-ingestion against your own node (designed and stubbed; RPC is the working path).
-- Multi-contract "nests", user-authored SQL views, generated schemas + tests from an ABI, a
-  GraphQL layer, streaming subscribe, scaled mode (Postgres + DataFusion), and local AI models
-  (Ollama / bring-your-own-key).
+- reth ExEx tip-ingestion against your own node (designed and stubbed; toolchain + dependency
+  blockers cleared, needs a synced node; RPC is the working path).
+- Generated schema, views, and tests from an ABI or a subgraph manifest; a GraphQL compatibility
+  layer; streaming subscribe (SSE); scaled mode (Postgres + DataFusion); local AI models
+  (Ollama / bring-your-own-key); factory/dynamic contract discovery; a local admin UI + webhooks;
+  a compliance pack; effectful transform worlds; a governed semantic layer; wildcard indexing.
 
 ## How it works
 
@@ -55,32 +69,32 @@ Tagline: "Be your own indexer."
 - AI-native today: a built-in MCP server, a `schema` tool, and a shipped `llms.txt` and Claude
   Code skill, all offline against your local instance. Local models (Ollama / BYO-key) are planned.
 
-## Install (pre-release)
+## Install (v0.1.0)
 
-- No published binaries yet; the shell installer is a placeholder that prints a notice.
-- Build from source: `cargo install nuthatch` (the crate name is reserved; publish is imminent).
-- Homebrew tap and the Docker (scaled-mode) stack are planned.
+- Prebuilt binaries for macOS (Apple Silicon) and Linux x86_64 on the GitHub release, with
+  SHA-256 checksums; the one-line installer (`curl -fsSL https://nuthatch-indexer.com/install.sh | sh`)
+  downloads and verifies them.
+- `cargo install nuthatch` from crates.io (rustc 1.95 or newer).
+- A Homebrew tap, an OCI image, and detached release signatures are still on the way.
 
-## Worked example (design preview)
+## Worked example
 
-`/example` is a design preview: it describes how a real community Graph Protocol subgraph
-(PaulieB14/horizon-indexer-subgraph, credited to Paul Barba) would be rebuilt as a Nuthatch
-"nest" — Graph Horizon staking on Arbitrum One across three contracts, one `init` over several
-addresses, raw event tables queryable during backfill, AssemblyScript handlers rebuilt as
-declarative incremental views (reorgs retract; no rollback code), generated tests, and serving
-over SQL, GraphQL, SSE, and MCP. This is the target design, not the current binary, which indexes
-a single contract's `Transfer` events with an incremental balance view.
+`/example` rebuilds a real community Graph Protocol subgraph (PaulieB14/horizon-indexer-subgraph,
+credited to Paul Barba) as a Nuthatch nest — Graph Horizon staking on Arbitrum One across three
+contracts, one `init` over several addresses, per-event tables queryable during backfill,
+AssemblyScript handlers rebuilt as declarative `views/*.sql` (reorgs retract; no rollback code),
+and parity via `nuthatch check`. Most of it runs on v0.1.0; the auto-generated GraphQL layer, SSE
+streams, and AI-assisted schema/test generation are marked as design targets.
 
-## Who runs it (design preview)
+## Who runs it
 
 `/stories` answers "is this for me?" through three illustrative personas (not testimonials),
-each mapped to one of the three front doors: an SQL endpoint for application backends,
-published nests for analysts who write no indexing code, and the built-in MCP server for
-agents. Like `/example`, it is written in the present tense for readability but describes the
-product as designed: multi-contract `init` and MCP work today, while user-authored views,
-`init --from`, non-`Transfer` decode, and chains other than mainnet are design targets. It
-notes that derived views read finalized data while raw event tables are fresh to the tip, and
-that a GraphQL layer for subgraph-shaped clients is on the roadmap.
+each mapped to one of the three front doors: an SQL endpoint for application backends, published
+nests for analysts who write no indexing code, and the built-in MCP server for agents. These
+workflows run on v0.1.0 — multi-contract nests, every declared event as a table, Arbitrum One and
+Base, user-authored views, `init --from`, `/sql`, and MCP all ship. The one forward-looking piece
+is a GraphQL layer for subgraph-shaped clients. It notes that derived views read finalized data
+while raw event tables are fresh to the tip.
 
 ## Roadmap
 
@@ -101,7 +115,7 @@ core. It promises order, not dates, and defers to the README progress log when t
 
 - Website: https://www.nuthatch-indexer.com/
 - Install guide: https://www.nuthatch-indexer.com/install
-- Design preview (subgraph to nest): https://www.nuthatch-indexer.com/example
+- Worked example (subgraph to nest): https://www.nuthatch-indexer.com/example
 - Who runs Nuthatch (personas): https://www.nuthatch-indexer.com/stories
 - Roadmap: https://www.nuthatch-indexer.com/roadmap
 - Manifesto: https://www.nuthatch-indexer.com/manifesto

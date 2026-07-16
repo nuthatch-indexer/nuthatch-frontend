@@ -38,7 +38,7 @@ const mcpConfig = `{
 <Layout
   path="/stories"
   title="Who runs Nuthatch — Nuthatch"
-  description="Three workflows through Nuthatch's three front doors: an SQL endpoint for app backends, published nests for analysts, and a built-in MCP server for agents. Design-preview workflows; Nuthatch is pre-release."
+  description="Three workflows through Nuthatch's three front doors: an SQL endpoint for app backends, published nests for analysts, and a built-in MCP server for agents. Illustrative personas, running on v0.1.0; only the GraphQL layer is still on the roadmap."
 >
   <section class="page">
     <article class="wrap narrow prose">
@@ -50,16 +50,14 @@ const mcpConfig = `{
         nests for people who want data without writing indexing code, and a built-in MCP
         server for agents. Same binary, same data, one process on your own hardware.
       </p>
-      <p class="illus">Illustrative workflows, not customer stories — Nuthatch is pre-release.</p>
+      <p class="illus">Illustrative workflows, not customer stories — Nuthatch is early v0.1.0 software.</p>
 
       <p class="preview-note">
-        <strong>These workflows describe the product as designed.</strong> They are written
-        in the present tense for readability. Today the binary indexes ERC-20
-        <code>Transfer</code> events across one or more contracts on a single chain, maintains
-        a balance view incrementally, and serves read-only SQL and MCP; multi-contract
-        <code>init</code> and the MCP server work now. User-authored views,
-        <code>init --from</code>, non-Transfer decode, and other chains are design targets —
-        see the <a href="/install">quickstart</a> for what runs today.
+        <strong>These workflows run on v0.1.0.</strong> Multi-contract nests, every declared event
+        as a queryable table, Arbitrum One and Base, user-authored <code>views/*.sql</code>,
+        <code>init --from</code>, read-only <code>/sql</code>, and the MCP server all ship today. The
+        one forward-looking piece is the GraphQL layer, noted where it appears; the personas are
+        illustrative. See the <a href="/roadmap">roadmap</a> for the dividing line.
       </p>
 
       <!-- STORY 1 -->

@@ -6,7 +6,7 @@ const GH = 'https://github.com/cargopete/nuthatch';
 <Layout
   path="/install"
   title="Install Nuthatch"
-  description="Install Nuthatch: build from source with cargo today; a shell installer, Homebrew tap, and Docker (scaled mode) are planned. With checksum and signature verification."
+  description="Install Nuthatch v0.1.0: a one-line installer or prebuilt binaries for macOS (Apple Silicon) and Linux x86_64, or cargo install from crates.io. Checksums verified; a Homebrew tap, an OCI image, and release signatures are on the way."
 >
   <section class="page">
     <div class="wrap narrow">
@@ -19,14 +19,15 @@ const GH = 'https://github.com/cargopete/nuthatch';
       </p>
 
       <p class="prerelease-note">
-        Nuthatch is pre-release. There are no published binaries yet and the shell installer is a
-        placeholder; the routes below describe the intended install surface. To try it today, build
-        from source with <code>cargo</code>. The Homebrew tap and the Docker (scaled-mode) stack are
-        planned.
+        <strong>v0.1.0 is out.</strong> Prebuilt binaries ship for macOS (Apple Silicon) and Linux
+        x86_64, and the crate is on crates.io. Nuthatch is early 0.x software under a config-stability
+        contract — see the <a href="/roadmap">roadmap</a>. A Homebrew tap, an OCI image, and detached
+        release signatures are still on the way; other platforms build from source with
+        <code>cargo</code> for now.
       </p>
 
-      <h2 class="ih">Shell script <span class="tag">planned</span></h2>
-      <p>Will detect your platform, download the matching static binary, verify its checksum, and put it on your <code>PATH</code>. Today it prints a pre-release notice.</p>
+      <h2 class="ih">Shell script</h2>
+      <p>Detects your platform, downloads the matching static binary from the latest GitHub release, verifies its SHA-256 checksum, and puts it on your <code>PATH</code>. Covers macOS Apple Silicon and Linux x86_64; other targets fall back to <code>cargo</code>.</p>
       <CopyBlock command="curl -fsSL https://nuthatch-indexer.com/install.sh | sh" size="lg" />
       <p class="note">
         Piping to a shell asks for trust. Read it first:
@@ -35,8 +36,12 @@ const GH = 'https://github.com/cargopete/nuthatch';
       </p>
 
       <h2 class="ih">Cargo</h2>
-      <p>If you have a Rust toolchain, build from source. No prebuilt binary in the trust path.</p>
+      <p>If you have a Rust toolchain (1.95 or newer), build from source off crates.io. No prebuilt binary in the trust path.</p>
       <CopyBlock command="cargo install nuthatch" />
+      <p class="note">
+        Or grab a tarball and its <code>.sha256</code> yourself from the
+        <a href="https://github.com/cargopete/nuthatch/releases/latest" rel="noopener">latest GitHub release</a>.
+      </p>
 
       <h2 class="ih">Homebrew <span class="tag">planned</span></h2>
       <p>macOS and Linuxbrew, once a tap is published.</p>
@@ -55,25 +60,29 @@ const GH = 'https://github.com/cargopete/nuthatch';
       <CopyBlock command="nuthatch init 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 --chain mainnet" />
       <CopyBlock command="nuthatch dev" />
       <p class="note">
-        <code>init</code> writes a config, the resolved ABI, an <code>llms.txt</code>, and a Claude
-        Code skill. <code>dev</code> follows the tip and serves entities, read-only SQL, balances,
-        and MCP on one local endpoint.
+        <code>init</code> resolves each contract's ABI (proxies included), scaffolds a nest, and
+        writes a <code>schema.json</code>, an <code>llms.txt</code>, and a Claude Code skill. Pass
+        several addresses to index a multi-contract nest, and <code>--chain arbitrum-one</code> or
+        <code>--chain base</code> for the L2s. <code>dev</code> follows the tip and serves
+        <code>/tables</code>, <code>/table/{'{'}name{'}'}</code>, read-only <code>/sql</code>,
+        balances, <code>/metrics</code>, and MCP on one local endpoint.
       </p>
 
       <hr class="divider ih-div" />
 
       <h2 class="ih">Verify what you downloaded</h2>
       <p>
-        Binaries ship with a SHA-256 checksum file and a detached signature. The shell
-        script checks the sum for you; do it yourself for the other routes.
+        Every release binary ships with a SHA-256 checksum file. The shell script checks the sum for
+        you; do it yourself for the manual download.
       </p>
-      <CopyBlock command="sha256sum -c nuthatch-<version>-<target>.tar.gz.sha256" prompt={true} />
-      <p>Then verify the signature against the release signing key:</p>
-      <CopyBlock command="gpg --verify nuthatch-<version>-<target>.tar.gz.sig" prompt={true} />
+      <CopyBlock command="sha256sum -c nuthatch-<target>.tar.gz.sha256" prompt={true} />
       <div class="keybox">
-        <span class="keybox-label">Release signing key</span>
-        <code class="keybox-id"><!-- TODO: real GPG key id at first tagged release -->0xNUTHATCH0000000000000000000000000000000</code>
-        <p class="keybox-note">Placeholder until the first signed release. The key id and fingerprint will be published here and in the repository.</p>
+        <span class="keybox-label">Detached signatures <span class="tag">planned</span></span>
+        <p class="keybox-note">
+          v0.1.0 ships checksums but not yet detached signatures. Minisign and cosign signing, with a
+          published key, land with the remaining release engineering — see the
+          <a href="/roadmap">roadmap</a>. Until then, verify the checksum.
+        </p>
       </div>
 
       <p class="backlink"><a href={GH} rel="noopener">Source, docs, and issues on GitHub →</a></p>

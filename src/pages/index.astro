@@ -23,7 +23,7 @@ const rows = [
   <!-- 1. HERO -->
   <section class="hero">
     <div class="wrap">
-      <p class="hero-eyebrow rise rise-1"><span class="tag">Pre-release · AGPL-3.0</span></p>
+      <p class="hero-eyebrow rise rise-1"><span class="tag">v0.1.0 · AGPL-3.0</span></p>
       <h1 class="rise rise-1">Be your own indexer.</h1>
       <p class="hero-sub narrow rise rise-2">
         Nuthatch is a self-hosted blockchain indexer in one Rust binary. From contract
@@ -67,8 +67,8 @@ const rows = [
     <div class="wrap">
       <div class="proof-grid">
         <div class="card proof-card">
-          <div class="proof-stat">≤ 2 GB RAM <span class="tag proof-tag">target</span></div>
-          <p>One chain, tip-following and serving, on a €5 VPS. That's the budget, enforced in CI.</p>
+          <div class="proof-stat">~58 MB RAM <span class="tag proof-tag">measured</span></div>
+          <p>A three-contract, 23-table nest, tip-following and serving, live — 2.8% of the 2 GB budget CI enforces.</p>
         </div>
         <div class="card proof-card">
           <div class="proof-stat">&lt; 2 minutes <span class="tag proof-tag">target</span></div>
@@ -200,15 +200,15 @@ const rows = [
     <div class="wrap">
       <div class="teaser-inner">
         <div>
-          <p class="section-label">Design preview</p>
-          <h2 class="teaser-h">Where it's headed: subgraph to nest.</h2>
+          <p class="section-label">Worked example</p>
+          <h2 class="teaser-h">A subgraph, rebuilt as a nest.</h2>
           <p class="teaser-copy">
-            The design target — a real Graph Horizon subgraph rebuilt as a nest: multiple
-            contracts, folded delegation state, time-bucketed views. Today's binary indexes a
-            single contract with an incremental balance view; the walkthrough shows the plan.
+            A real Graph Horizon subgraph rebuilt as a Nuthatch nest — multiple contracts on
+            Arbitrum One, folded delegation state, user-authored views, parity-checked. It runs on
+            v0.1.0; only the GraphQL layer is still on the roadmap.
           </p>
         </div>
-        <a class="btn btn-ghost teaser-btn" href="/example">See the design →</a>
+        <a class="btn btn-ghost teaser-btn" href="/example">See the example →</a>
       </div>
     </div>
   </section>
