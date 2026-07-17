@@ -1,6 +1,1 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Nuthatch">
-  <!-- nuthatch in head-down descent: round head, swept wing, straight bill -->
-  <path d="M23 45 C15 45 11 36 16 29 C20 23 27 24 30 30 C34 24 44 16 55 9 C51 21 44 30 35 35 C39 37 44 37 48 35 C44 43 36 47 28 45 C27 48 25 50 22 51 Z" fill="#8bb8dc"/>
-  <path d="M20 44 L26 40 L13 53 Z" fill="#cd8560"/>
-  <circle cx="22" cy="35" r="2.1" fill="#171614"/>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Nuthatch"><rect width="512" height="512" rx="96" fill="#171614"/><path d="M104,112 H180 V400 H104 Z" fill="#EDE6DA"/><path d="M332,112 H408 V400 H332 Z" fill="#EDE6DA"/><path d="M104,86 L180,124 L318,318 L318,404 L312,452 L286,408 L104,204 Z" fill="#EDE6DA"/><circle cx="296" cy="374" r="14" fill="#D97706"/></svg>

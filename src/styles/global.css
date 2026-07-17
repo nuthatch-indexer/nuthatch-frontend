@@ -1,5 +1,5 @@
 /* ==========================================================================
-   Nuthatch — global styles
+   Nuthatch - global styles
    Design language: premium utilitarian minimalism (minimalist-ui taste skill),
    rendered dark-by-default with a CSS-only light toggle. Flat surfaces, 1px
    borders, scarce pastel spot-accents, macro whitespace, editorial type.
@@ -33,9 +33,9 @@
   --text:        #ece9e3;   /* warm off-white, never pure white */
   --text-muted:  #9c978c;
   --text-faint:  #6e6a61;
-  --accent:      #8bb8dc;   /* muted slate blue — nuthatch back */
+  --accent:      #8bb8dc;   /* muted slate blue - nuthatch back */
   --accent-ink:  #cfe3f2;
-  --rust:        #cd8560;   /* muted terracotta — nuthatch underside */
+  --rust:        #cd8560;   /* muted terracotta - nuthatch underside */
   --ok:          #86b592;   /* washed green (terminal success) */
   --warn:        #cdb06a;
 

@@ -1,4 +1,4 @@
-# Nuthatch — full description
+# Nuthatch - full description
 
 Nuthatch is a self-hosted-first, AI-native blockchain indexer. One Rust binary, one command,
 a live indexed API. There is no mandatory third-party data dependency, ever. Tagline: "Be your
@@ -28,11 +28,11 @@ obstacle has been the operational weight of the tooling, which is an engineering
 
 ## What it does today
 
-1. `nuthatch init 0xAddr [0xAddr…] --chain <mainnet|arbitrum-one|base>` — resolves each contract's
+1. `nuthatch init 0xAddr [0xAddr…] --chain <mainnet|arbitrum-one|base>` - resolves each contract's
    ABI (Sourcify first, then an Etherscan-class API, cached; EIP-1967/legacy-OZ proxies resolved)
    and scaffolds a multi-contract nest: `nuthatch.toml`, `abis/`, a `schema.json`, an `llms.txt`,
    and a Claude Code skill. It does not yet generate views, handlers, or tests from the ABI.
-2. `nuthatch dev` — polls logs over RPC (round-robin failover, adaptive `getLogs` chunking), decodes
+2. `nuthatch dev` - polls logs over RPC (round-robin failover, adaptive `getLogs` chunking), decodes
    every declared event of every contract (topic0 registry → one table per `{alias}__{event}`),
    stores rows in an embedded hot store (redb), seals finalized ranges to content-addressed Parquet
    (pruning the hot store), and serves a local HTTP API on 127.0.0.1:8288: `/tables`,
@@ -45,11 +45,11 @@ obstacle has been the operational weight of the tooling, which is an engineering
 3. Nests: `nuthatch init --from <git-url | ./dir>` runs a published nest (vendored ABIs + deployment
    blocks, schema-version guarded); `views/*.sql` add derived entities; `nuthatch check` runs
    `checks/*.sql` against recorded fixtures (hermetic parity/invariant framework).
-4. `nuthatch transform <component.wasm>` — runs a pure, zero-capability WASM transform over an Arrow
-   batch. `nuthatch mcp` — serves the Model Context Protocol over stdio (8 tools).
+4. `nuthatch transform <component.wasm>` - runs a pure, zero-capability WASM transform over an Arrow
+   batch. `nuthatch mcp` - serves the Model Context Protocol over stdio (8 tools).
 
 Chains: Ethereum mainnet, Arbitrum One (42161), Base (8453), finality as a per-chain policy.
-Measured footprint (not a target): ~37 MB single contract, ~58 MB three-contract 23-table nest —
+Measured footprint (not a target): ~37 MB single contract, ~58 MB three-contract 23-table nest -
 2.8% of the ≤2 GB CI budget (the `footprint` job fails above 256 MB). The measured backfill
 throughput progression is ~289 → 2,521 → 5,837 ev/s on public RPC (~20× over baseline,
 byte-identical segments). v0.1.0 is tagged, on crates.io, with prebuilt binaries for macOS
@@ -94,9 +94,9 @@ block inputs always produce identical stored state. Entity authoring:
 
 Capability isolation makes purity checkable from a component's imports alone: a component granted
 zero capabilities is pure and may feed entity derivation; effectful components (for example HTTP
-enrichers) produce annotations only, never canonical entities — that effectful path is designed,
+enrichers) produce annotations only, never canonical entities - that effectful path is designed,
 not built. Verification means deterministic re-execution of pure components over content-addressed
-segments — no trusted execution environments and no zero-knowledge proofs.
+segments - no trusted execution environments and no zero-knowledge proofs.
 
 ## AI-native, without phone-home
 
@@ -123,9 +123,9 @@ segments — no trusted execution environments and no zero-knowledge proofs.
 
 ## Worked example (/example)
 
-The page at https://www.nuthatch-indexer.com/example rebuilds a real community subgraph —
+The page at https://www.nuthatch-indexer.com/example rebuilds a real community subgraph -
 PaulieB14/horizon-indexer-subgraph, credited to Paul Barba's "Horizon Indexer Performance"
-subgraph — as a Nuthatch nest: Graph Horizon staking on Arbitrum One across three contracts, one
+subgraph - as a Nuthatch nest: Graph Horizon staking on Arbitrum One across three contracts, one
 `init` over several addresses, per-event tables queryable during backfill, AssemblyScript handlers
 rebuilt as declarative `views/*.sql` (reorgs retract; no hand-written rollback), a shareable nest
 consumed via `nuthatch init --from`, and parity via `nuthatch check`. All of that runs on v0.1.0.
@@ -135,12 +135,12 @@ AI-assisted schema/test generation from an ABI or a subgraph manifest (`init --f
 ## Who runs it (/stories)
 
 The page at https://www.nuthatch-indexer.com/stories answers "is this for me?" through three
-illustrative personas — not testimonials, first names only — each traced end to end through one of
+illustrative personas - not testimonials, first names only - each traced end to end through one of
 the three front doors: an SQL endpoint (`POST /sql`) for application backends, published nests for
 analysts who write no indexing code, and the built-in MCP server for agents. These workflows run on
 v0.1.0: multi-contract nests, every declared event as a table, Arbitrum One and Base, user-authored
 views, `init --from`, `/sql`, and MCP all ship. The one forward-looking piece is a GraphQL layer
-for subgraph-shaped clients. The page states the freshness caveat plainly — derived views read
+for subgraph-shaped clients. The page states the freshness caveat plainly - derived views read
 finalized data, raw event tables are fresh to the tip. Do not infer customers, quotes, or benchmark
 numbers from it.
 
@@ -152,29 +152,29 @@ shipped; the numbered RFCs under `docs/rfcs/` are the source of truth for what i
 the README and the page disagree, the README wins. Reading key: shipped = merged with tests and,
 where relevant, a measured number; in progress = partially landed, remainder tracked; planned = an
 RFC written in the repo, not yet started; not planned = a deliberate scope decision. Dates are not
-promised — order is.
+promised - order is.
 
 - Shipped: the embedded single-binary pipeline end to end (multi-contract ABI-driven decode of
-  every declared event, provenance/ergonomics columns — `block_hash`, `_seq`, `block_timestamp`,
-  `*_dec`/`*_overflow` — reorg-safe hot store, finality-sealed content-addressed Parquet, DuckDB
+  every declared event, provenance/ergonomics columns - `block_hash`, `_seq`, `block_timestamp`,
+  `*_dec`/`*_overflow` - reorg-safe hot store, finality-sealed content-addressed Parquet, DuckDB
   SQL over `/tables` + `/table/{name}`, an i128 DBSP balance view with restart-replay, HTTP + an
   8-tool offline MCP server); nests (`init --from`, vendored ABIs + deploy blocks, schema
   versioning, `views/*.sql` with empty-typed-view handling, the `nuthatch check` parity framework);
   three chains (Ethereum mainnet + Arbitrum One + Base) with finality as policy; the complete
   backfill work (RFC-0004: bench harness, seal-direct, pipelined fetching, adaptive chunker,
   `dev --seal-direct`) measured at ~289 → 2,521 → 5,837 ev/s on public RPC (~20× over baseline,
-  byte-identical segments); the operator surface (Prometheus `/metrics`, `/sql` guards — timeout,
-  row cap, concurrency — graceful shutdown, a 0.x config-stability contract); pure zero-capability
+  byte-identical segments); the operator surface (Prometheus `/metrics`, `/sql` guards - timeout,
+  row cap, concurrency - graceful shutdown, a 0.x config-stability contract); pure zero-capability
   WASM transforms; the tagged v0.1.0 release on crates.io with prebuilt binaries; a CI RAM-budget
   gate with a measured footprint (~37 MB single contract, ~58 MB three-contract 23-table nest,
   2.8% of 2 GB).
 - In progress: the Horizon nest parity fixtures against the deployed community subgraph (RFC-0002);
-  reth ExEx wiring (RFC-0003 — Source trait, library split, and bridge in and tested, rustc 1.95
+  reth ExEx wiring (RFC-0003 - Source trait, library split, and bridge in and tested, rustc 1.95
   satisfies both reth 2.4 and dbsp; needs a synced node).
-- Planned: the remaining v0.1.x release engineering (RFC-0005 — signed artifacts, a real
+- Planned: the remaining v0.1.x release engineering (RFC-0005 - signed artifacts, a real
   install.sh, a Homebrew tap, an OCI image); factory/dynamic contract discovery (RFC-0009); the
   graph-network nest and Lodestar migration (RFC-0011); a local admin UI + webhooks (RFC-0010); the
-  compliance pack (RFC-0008 — pure list-snapshot screening, threshold/velocity flags, reproducible
+  compliance pack (RFC-0008 - pure list-snapshot screening, threshold/velocity flags, reproducible
   `audit replay`); and deferred items marked "RFC to come" (scaled Postgres + DataFusion mode,
   effectful transform worlds + signed manifests, a governed semantic layer + NL queries, a GraphQL
   compatibility layer, IVM generalisation, wildcard indexing).
@@ -205,5 +205,5 @@ kind; non-EVM chains before EVM is airtight; trusted-execution attestation or ze
 - Who runs Nuthatch (personas): https://www.nuthatch-indexer.com/stories
 - Roadmap: https://www.nuthatch-indexer.com/roadmap
 - Manifesto: https://www.nuthatch-indexer.com/manifesto
-- Source, docs, discussions: https://github.com/cargopete/nuthatch
+- Source, docs, discussions: https://github.com/nuthatch-indexer/nuthatch
 - Licence: AGPL-3.0-only

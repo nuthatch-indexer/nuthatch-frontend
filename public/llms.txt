@@ -80,7 +80,7 @@ Tagline: "Be your own indexer."
 ## Worked example
 
 `/example` rebuilds a real community Graph Protocol subgraph (PaulieB14/horizon-indexer-subgraph,
-credited to Paul Barba) as a Nuthatch nest — Graph Horizon staking on Arbitrum One across three
+credited to Paul Barba) as a Nuthatch nest - Graph Horizon staking on Arbitrum One across three
 contracts, one `init` over several addresses, per-event tables queryable during backfill,
 AssemblyScript handlers rebuilt as declarative `views/*.sql` (reorgs retract; no rollback code),
 and parity via `nuthatch check`. Most of it runs on v0.1.0; the auto-generated GraphQL layer, SSE
@@ -91,7 +91,7 @@ streams, and AI-assisted schema/test generation are marked as design targets.
 `/stories` answers "is this for me?" through three illustrative personas (not testimonials),
 each mapped to one of the three front doors: an SQL endpoint for application backends, published
 nests for analysts who write no indexing code, and the built-in MCP server for agents. These
-workflows run on v0.1.0 — multi-contract nests, every declared event as a table, Arbitrum One and
+workflows run on v0.1.0 - multi-contract nests, every declared event as a table, Arbitrum One and
 Base, user-authored views, `init --from`, `/sql`, and MCP all ship. The one forward-looking piece
 is a GraphQL layer for subgraph-shaped clients. It notes that derived views read finalized data
 while raw event tables are fresh to the tip.
@@ -119,6 +119,6 @@ core. It promises order, not dates, and defers to the README progress log when t
 - Who runs Nuthatch (personas): https://www.nuthatch-indexer.com/stories
 - Roadmap: https://www.nuthatch-indexer.com/roadmap
 - Manifesto: https://www.nuthatch-indexer.com/manifesto
-- Source and docs: https://github.com/cargopete/nuthatch
+- Source and docs: https://github.com/nuthatch-indexer/nuthatch
 - Full description for models: https://www.nuthatch-indexer.com/llms-full.txt
 - Licence: AGPL-3.0-only

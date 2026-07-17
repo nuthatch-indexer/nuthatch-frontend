@@ -4,7 +4,7 @@ import CopyBlock from '../components/CopyBlock.astro';
 import Terminal from '../components/Terminal.astro';
 import Pipeline from '../components/Pipeline.astro';
 
-const GH = 'https://github.com/cargopete/nuthatch';
+const GH = 'https://github.com/nuthatch-indexer/nuthatch';
 
 // Comparison rows. mark: 'yes' | 'no' | 'part' | text-only via `text`.
 const cols = ['Nuthatch', 'The Graph', 'Goldsky', 'Ponder'];
@@ -36,7 +36,7 @@ const rows = [
         <p class="hero-alt">
           or: <code>cargo install nuthatch</code>
           &nbsp;·&nbsp;
-          <a href="https://github.com/cargopete/nuthatch-frontend/blob/main/public/install.sh" rel="noopener">verify the script</a>
+          <a href="https://github.com/nuthatch-indexer/nuthatch-frontend/blob/main/public/install.sh" rel="noopener">verify the script</a>
         </p>
       </div>
 
@@ -45,7 +45,7 @@ const rows = [
         <a class="btn btn-ghost" href={GH} rel="noopener">
           <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
           Star on GitHub
-          <span class="stars"><!-- TODO: live badge post-launch -->—</span>
+          <span class="stars"><!-- TODO: live badge post-launch -->-</span>
         </a>
       </div>
     </div>
@@ -68,7 +68,7 @@ const rows = [
       <div class="proof-grid">
         <div class="card proof-card">
           <div class="proof-stat">~58 MB RAM <span class="tag proof-tag">measured</span></div>
-          <p>A three-contract, 23-table nest, tip-following and serving, live — 2.8% of the 2 GB budget CI enforces.</p>
+          <p>A three-contract, 23-table nest, tip-following and serving, live - 2.8% of the 2 GB budget CI enforces.</p>
         </div>
         <div class="card proof-card">
           <div class="proof-stat">&lt; 2 minutes <span class="tag proof-tag">target</span></div>
@@ -119,7 +119,7 @@ const rows = [
         </div>
       </div>
       <p class="how-foot">
-        Where this is going is public, RFC by RFC — <a href="/roadmap">see the roadmap</a>.
+        Where this is going is public, RFC by RFC - <a href="/roadmap">see the roadmap</a>.
       </p>
     </div>
   </section>
@@ -174,7 +174,7 @@ const rows = [
                   return (
                     <td class={i === 0 ? 'ct-us' : ''}>
                       {kind === 'yes' && <span class="ct-mark ct-yes" aria-label="yes">✓</span>}
-                      {kind === 'no' && <span class="ct-mark ct-no" aria-label="no">—</span>}
+                      {kind === 'no' && <span class="ct-mark ct-no" aria-label="no">-</span>}
                       {kind === 'part' && <span class="ct-mark ct-part" aria-label="partial">~</span>}
                       {kind === 't' && <span class="ct-text">{note}</span>}
                       {note && kind !== 't' && <span class="ct-note">{note}</span>}
@@ -203,7 +203,7 @@ const rows = [
           <p class="section-label">Worked example</p>
           <h2 class="teaser-h">A subgraph, rebuilt as a nest.</h2>
           <p class="teaser-copy">
-            A real Graph Horizon subgraph rebuilt as a Nuthatch nest — multiple contracts on
+            A real Graph Horizon subgraph rebuilt as a Nuthatch nest - multiple contracts on
             Arbitrum One, folded delegation state, user-authored views, parity-checked. It runs on
             v0.1.0; only the GraphQL layer is still on the roadmap.
           </p>
@@ -236,7 +236,7 @@ const rows = [
             <li><code>init</code> resolves the ABI and scaffolds the project: config, <code>llms.txt</code>, and a Claude Code skill.</li>
             <li>The skill hands the tool the real query surface, so it uses actual endpoints, not guesses.</li>
             <li><em>Planned:</em> generated schema, views, and tests from an ABI, reviewed through the deterministic core.</li>
-            <li><em>Planned:</em> local models via Ollama or your own key — no AI feature will require the cloud.</li>
+            <li><em>Planned:</em> local models via Ollama or your own key - no AI feature will require the cloud.</li>
           </ul>
         </div>
       </div>

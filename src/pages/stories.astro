@@ -2,7 +2,7 @@
 import Layout from '../layouts/Layout.astro';
 import CodeCard from '../components/CodeCard.astro';
 
-// Story 1 — a dapp backend. Multi-contract init works today; Arbitrum and
+// Story 1 - a dapp backend. Multi-contract init works today; Arbitrum and
 // non-Transfer decode are design targets (this page is a design preview).
 const initCmd = `nuthatch init --chain arbitrum-one \\
   0x1F98431c8aD98523631AE4a59f267346ea31F984 \\
@@ -23,12 +23,12 @@ const sqlCurl = `curl -s http://127.0.0.1:8288/sql \\
   -H 'content-type: application/json' \\
   -d '{"query": "select net_supplied from positions where user_address = $1", "params": ["0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D"]}'`;
 
-// Story 2 — a published nest. init --from is a design target.
-const initFrom = `nuthatch init --from https://github.com/example/horizon-nest`;
+// Story 2 - a published nest. init --from is a design target.
+const initFrom = `nuthatch init --from https://github.com/nuthatch-indexer/horizon-nest`;
 
 const indexersQuery = `select * from indexers order by total_rewards_earned desc limit 20;`;
 
-// Story 3 — a local agent. The MCP server and its schema/sql tools work today.
+// Story 3 - a local agent. The MCP server and its schema/sql tools work today.
 const mcpConfig = `{
   "mcpServers": {
     "nuthatch": { "command": "nuthatch", "args": ["mcp"] }
@@ -37,7 +37,7 @@ const mcpConfig = `{
 ---
 <Layout
   path="/stories"
-  title="Who runs Nuthatch — Nuthatch"
+  title="Who runs Nuthatch - Nuthatch"
   description="Three workflows through Nuthatch's three front doors: an SQL endpoint for app backends, published nests for analysts, and a built-in MCP server for agents. Illustrative personas, running on v0.1.0; only the GraphQL layer is still on the roadmap."
 >
   <section class="page">
@@ -50,7 +50,7 @@ const mcpConfig = `{
         nests for people who want data without writing indexing code, and a built-in MCP
         server for agents. Same binary, same data, one process on your own hardware.
       </p>
-      <p class="illus">Illustrative workflows, not customer stories — Nuthatch is early v0.1.0 software.</p>
+      <p class="illus">Illustrative workflows, not customer stories - Nuthatch is early v0.1.0 software.</p>
 
       <p class="preview-note">
         <strong>These workflows run on v0.1.0.</strong> Multi-contract nests, every declared event
@@ -64,7 +64,7 @@ const mcpConfig = `{
       <h2>A dapp backend</h2>
       <p>
         Maya's three-person team runs a lending protocol on Arbitrum. The frontend needs user
-        positions, borrow history, and a few protocol-wide stats — the read side of the app,
+        positions, borrow history, and a few protocol-wide stats - the read side of the app,
         the part a managed indexer usually bills for.
       </p>
       <p>
@@ -79,7 +79,7 @@ const mcpConfig = `{
       </p>
       <CodeCard code={positionsView} lang="sql" label="views/positions.sql" />
       <p>
-        Her API route calls <code>POST /sql</code> the same way it would call Postgres — one
+        Her API route calls <code>POST /sql</code> the same way it would call Postgres - one
         read-only endpoint on localhost, no driver to install, no connection pool to babysit:
       </p>
       <CodeCard code={sqlCurl} lang="bash" label="the frontend reads it like a database" />
@@ -100,11 +100,11 @@ const mcpConfig = `{
         Petar delegates GRT and wants one thing: to see which Graph Horizon indexers actually
         earn. He does not want to write handlers, and he does not need to.
       </p>
-      <!-- TODO: link horizon-nest when published -->
       <p>
-        He pulls a published nest — contracts, vendored ABIs, and derived views all included —
-        and runs it against his own node. He wrote no indexing code; he ran someone else's
-        definition:
+        He pulls a published nest - the
+        <a href="https://github.com/nuthatch-indexer/horizon-nest" rel="noopener">horizon-nest</a>,
+        with contracts, vendored ABIs, and derived views all included - and runs it against his own
+        node. He wrote no indexing code; he ran someone else's definition:
       </p>
       <CodeCard code={initFrom} lang="bash" label="run a published nest" />
       <p>
@@ -118,7 +118,7 @@ const mcpConfig = `{
       </p>
       <p class="note">
         Derived views read finalized data; the raw event tables are fresh to the tip. A
-        dashboard built on views trails the chain head by finality — the honest trade for
+        dashboard built on views trails the chain head by finality - the honest trade for
         numbers that never retract under you.
       </p>
 
@@ -128,7 +128,7 @@ const mcpConfig = `{
       <h2>An agent, locally</h2>
       <p>
         Dana builds a DeFi assistant. She wants it to answer questions about on-chain data
-        without shipping that data — or her users' questions — to anyone.
+        without shipping that data - or her users' questions - to anyone.
       </p>
       <p>She adds Nuthatch to the agent's MCP config. That is the whole integration:</p>
       <CodeCard code={mcpConfig} lang="json" label=".mcp.json" />

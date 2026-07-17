@@ -2,16 +2,16 @@
 # Nuthatch installer.
 #
 # Downloads the prebuilt static binary for your platform from the latest GitHub release, verifies
-# its SHA-256 checksum, and installs it. No compiler needed — you never build from source, so the
+# its SHA-256 checksum, and installs it. No compiler needed - you never build from source, so the
 # rustc toolchain on your machine is irrelevant.
 #
 # It is deliberately short and readable. Piping a script to a shell asks for trust; read it first.
-#   Source: https://github.com/cargopete/nuthatch
+#   Source: https://github.com/nuthatch-indexer/nuthatch
 #   Override install dir with NUTHATCH_INSTALL_DIR (default: $HOME/.local/bin).
 
 set -eu
 
-REPO="cargopete/nuthatch"
+REPO="nuthatch-indexer/nuthatch"
 BASE="https://github.com/${REPO}/releases/latest/download"
 
 os="$(uname -s)"
@@ -20,16 +20,16 @@ case "$os" in
   Darwin)
     case "$arch" in
       arm64 | aarch64) target="aarch64-apple-darwin" ;;
-      x86_64) echo "nuthatch: no prebuilt binary for Intel Mac yet — build from source: cargo install nuthatch" >&2; exit 1 ;;
+      x86_64) echo "nuthatch: no prebuilt binary for Intel Mac yet - build from source: cargo install nuthatch" >&2; exit 1 ;;
       *) echo "nuthatch: unsupported macOS architecture '$arch'" >&2; exit 1 ;;
     esac ;;
   Linux)
     case "$arch" in
       x86_64 | amd64) target="x86_64-unknown-linux-gnu" ;;
-      *) echo "nuthatch: no prebuilt binary for Linux '$arch' yet — build from source: cargo install nuthatch" >&2; exit 1 ;;
+      *) echo "nuthatch: no prebuilt binary for Linux '$arch' yet - build from source: cargo install nuthatch" >&2; exit 1 ;;
     esac ;;
   *)
-    echo "nuthatch: unsupported OS '$os' — build from source: cargo install nuthatch" >&2; exit 1 ;;
+    echo "nuthatch: unsupported OS '$os' - build from source: cargo install nuthatch" >&2; exit 1 ;;
 esac
 
 tarball="nuthatch-${target}.tar.gz"

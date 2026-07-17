@@ -1,6 +1,6 @@
 # nuthatch-frontend
 
-The website for [Nuthatch](https://github.com/cargopete/nuthatch) — a self-hosted-first,
+The website for [Nuthatch](https://github.com/nuthatch-indexer/nuthatch) - a self-hosted-first,
 AI-native blockchain indexer in one Rust binary.
 
 Built with [Astro](https://astro.build), static output only. The site's pitch is "nothing
@@ -13,8 +13,8 @@ blocks and the terminal typewriter, both of which degrade gracefully with JS dis
 ```
 public/
   fonts/                 self-hosted, subset variable fonts (Space Grotesk, JetBrains Mono)
-  favicon.svg            the nuthatch mark: head-down on a vertical line, two colours
-  install.sh             pre-release placeholder installer (echo + exit 0)
+  favicon.svg            the nuthatch badge: a cream mark on a dark rounded tile, amber eye
+  install.sh             fetches the release binary for your platform and verifies its checksum
   llms.txt               concise, agent-legible product summary
   llms-full.txt          full description for language models
   robots.txt             welcomes crawlers; points at the sitemap and llms files
@@ -24,7 +24,7 @@ src/
   components/
     Nav.astro            sticky nav + CSS-only light/dark toggle (:has() checkbox hack)
     Footer.astro         links, licence, "no third-party resources" note
-    Mark.astro           the logo, theme-aware inline SVG
+    Mark.astro           the logo badge, inline SVG (fixed brand colours)
     CopyBlock.astro      copyable command block (copy button flips to "copied")
     CodeCard.astro       multi-line code block, build-time Shiki highlight + copy button
     Terminal.astro       faux-OS terminal, static transcript + typewriter enhancement
@@ -63,7 +63,7 @@ npm run preview    # serve the built site locally
 
 `dist/` is plain static files and works on any static host.
 
-## Deploy — Cloudflare Pages
+## Deploy - Cloudflare Pages
 
 - Build command: `npm run build`
 - Build output directory: `dist`
@@ -77,7 +77,7 @@ plain nginx box with no changes.
 The landing page is intended to stay under **100 KB total transfer** (excluding any future
 terminal recording) and score Lighthouse 100 across the board. The two woff2 fonts (~40 KB
 combined) are the only sub-resources; CSS is inlined into each page; the interaction JS is a
-few hundred bytes. Being tiny and instant is part of the pitch — keep it that way.
+few hundred bytes. Being tiny and instant is part of the pitch - keep it that way.
 
 Fonts were subset from the full latin variable faces with `fonttools`:
 Space Grotesk keeps its weight axis; JetBrains Mono is pinned to a single weight.

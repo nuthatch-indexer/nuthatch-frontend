@@ -36,8 +36,8 @@ const graphqlQuery = `{
 ---
 <Layout
   path="/example"
-  title="From subgraph to nest: indexing Graph Horizon — Nuthatch"
-  description="A worked example: a real Graph Horizon subgraph rebuilt as a Nuthatch nest — multi-contract, Arbitrum One, folded state, user-authored views, parity-checked. Most of this ships in v0.1.0; the GraphQL layer, SSE streams, and AI-assisted generation are marked as planned."
+  title="From subgraph to nest: indexing Graph Horizon - Nuthatch"
+  description="A worked example: a real Graph Horizon subgraph rebuilt as a Nuthatch nest - multi-contract, Arbitrum One, folded state, user-authored views, parity-checked. Most of this ships in v0.1.0; the GraphQL layer, SSE streams, and AI-assisted generation are marked as planned."
 >
   <section class="page">
     <article class="wrap narrow prose">
@@ -47,15 +47,15 @@ const graphqlQuery = `{
       <p class="preview-note">
         <strong>Most of this runs on v0.1.0.</strong> Multi-contract nests, Arbitrum One, per-event
         tables, user-authored <code>views/*.sql</code>, <code>init --from</code>, and the
-        <code>nuthatch check</code> parity framework all ship today. Still design targets — marked
-        where they appear — are the auto-generated GraphQL layer, SSE streams, and AI-assisted schema
+        <code>nuthatch check</code> parity framework all ship today. Still design targets - marked
+        where they appear - are the auto-generated GraphQL layer, SSE streams, and AI-assisted schema
         and test generation from an ABI or a subgraph manifest. See the <a href="/roadmap">roadmap</a>
         for the dividing line.
       </p>
 
       <p>
-        This example indexes The Graph's own network activity — operator mappings,
-        allocations, indexing rewards and query fees, delegation balances — without using The
+        This example indexes The Graph's own network activity - operator mappings,
+        allocations, indexing rewards and query fees, delegation balances - without using The
         Graph to do it. It runs on your hardware, against Arbitrum One, from three contracts.
       </p>
       <p>
@@ -69,14 +69,14 @@ const graphqlQuery = `{
       <h2>One command, three contracts</h2>
       <CodeCard code={initCmd} lang="bash" label="shell" />
       <p>
-        The ABIs come from Sourcify — all three contracts are verified — and each contract's
+        The ABIs come from Sourcify - all three contracts are verified - and each contract's
         deployment block is detected automatically, so the backfill knows where to start.
         What you get back is a <strong>nest</strong>: a scaffolded project with
         <code>nuthatch.toml</code>, the resolved <code>abis/</code>, and a <code>schema.json</code>,
         ready for your <code>views/</code> and <code>checks/</code>.
       </p>
       <p>
-        A nest is the unit of indexing definition — a directory of config and views you can
+        A nest is the unit of indexing definition - a directory of config and views you can
         commit, share, and re-run anywhere. A published nest is reusable directly:
         <code>nuthatch init --from &lt;git-url&gt;</code> pulls someone else's and runs it
         against your own node.
@@ -84,9 +84,9 @@ const graphqlQuery = `{
 
       <h2>Queryable before you model anything</h2>
       <p>
-        Every event in those ABIs is a table the moment the nest exists —
+        Every event in those ABIs is a table the moment the nest exists -
         <code>allocation_created</code>, <code>stake_delegated</code>,
-        <code>query_fees_collected</code>, and the rest — filling in as the backfill streams
+        <code>query_fees_collected</code>, and the rest - filling in as the backfill streams
         through history. Before you write a single line of modelling, you can ask real
         questions of the raw layer:
       </p>
@@ -109,25 +109,25 @@ const graphqlQuery = `{
       <CodeCard code={indexersView} lang="sql" label="views/indexers.sql" />
       <p>The rest of the subgraph maps across the same way:</p>
       <ul class="maplist">
-        <li><span class="mk">operators</span> — the latest <code>OperatorSet</code> per indexer.</li>
-        <li><span class="mk">allocations</span> — <code>Created</code>, <code>Resized</code>, and <code>Closed</code> folded into current state and status.</li>
-        <li><span class="mk">delegations</span> — <code>Delegated</code>, <code>Locked</code>, and <code>Withdrawn</code> folded per delegator into a running balance.</li>
-        <li><span class="mk">daily and hourly aggregations</span> — ordinary time-bucketed views of rewards, fees, and delegation events, maintained incrementally.</li>
-        <li><span class="mk">global stats</span> — a view over the views above.</li>
+        <li><span class="mk">operators</span> - the latest <code>OperatorSet</code> per indexer.</li>
+        <li><span class="mk">allocations</span> - <code>Created</code>, <code>Resized</code>, and <code>Closed</code> folded into current state and status.</li>
+        <li><span class="mk">delegations</span> - <code>Delegated</code>, <code>Locked</code>, and <code>Withdrawn</code> folded per delegator into a running balance.</li>
+        <li><span class="mk">daily and hourly aggregations</span> - ordinary time-bucketed views of rewards, fees, and delegation events, maintained incrementally.</li>
+        <li><span class="mk">global stats</span> - a view over the views above.</li>
       </ul>
       <p class="aside">
         The global-singleton entity is a well-known subgraph anti-pattern: every event contends
         on one hot row, and it serialises writes across the whole indexer. As an incremental
-        aggregate it costs nothing — a running total the engine already keeps.
+        aggregate it costs nothing - a running total the engine already keeps.
       </p>
 
       <h2>Parity you can check, not just claim</h2>
       <p>
-        A nest ships <code>checks/*.sql</code> — read-only queries over its sealed data — and
+        A nest ships <code>checks/*.sql</code> - read-only queries over its sealed data - and
         <code>nuthatch check</code> compares each result to a recorded fixture, printing a row-level
         diff and exiting non-zero on a mismatch. For this nest the fixtures are the deployed
         subgraph's own answers at a pinned block, so <code>nuthatch check</code> <em>is</em> the
-        parity test. It is hermetic — committed fixtures, no live endpoint — so it runs in CI with no
+        parity test. It is hermetic - committed fixtures, no live endpoint - so it runs in CI with no
         network.
       </p>
       <CopyBlock command="nuthatch check" />
@@ -143,23 +143,24 @@ const graphqlQuery = `{
         <code>nuthatch dev</code> serves one local endpoint: <code>/tables</code> and
         <code>/table/{'{'}name{'}'}</code>, read-only <code>/sql</code>, balances,
         <code>/metrics</code>, and the built-in MCP server. An auto-generated GraphQL layer and SSE
-        streams — shaped so queries written against the original subgraph carry over with little
-        change — are <em>planned</em>:
+        streams - shaped so queries written against the original subgraph carry over with little
+        change - are <em>planned</em>:
       </p>
-      <CodeCard code={graphqlQuery} lang="graphql" label="planned — top indexers by rewards" />
+      <CodeCard code={graphqlQuery} lang="graphql" label="planned - top indexers by rewards" />
       <p>
         The MCP server is the same endpoint from an agent's side. Point Claude, or any client,
-        at your own instance and ask which indexers earned the most this week — schema
+        at your own instance and ask which indexers earned the most this week - schema
         discovery is built in, so it knows the shape without being told, and nothing leaves
         your machine.
       </p>
 
       <hr class="divider close-div" />
       <p class="signoff">
-        So this page described indexing The Graph's network without The Graph — on your own
-        hardware, with no deploy key, no gateway, and no query fees. The subgraph it is based on
-        is worth reading. <a href="/manifesto">Read the manifesto</a>, or
-        <a href="https://github.com/cargopete/nuthatch" rel="noopener">star the repo</a>.
+        So this page described indexing The Graph's network without The Graph - on your own
+        hardware, with no deploy key, no gateway, and no query fees. The finished nest is published
+        as <a href="https://github.com/nuthatch-indexer/horizon-nest" rel="noopener">horizon-nest</a>,
+        and the subgraph it is based on is worth reading. <a href="/manifesto">Read the manifesto</a>,
+        or <a href="https://github.com/nuthatch-indexer/nuthatch" rel="noopener">star the repo</a>.
       </p>
     </article>
   </section>

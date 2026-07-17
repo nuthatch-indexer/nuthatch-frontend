@@ -3,7 +3,7 @@ User-agent: *
 Allow: /
 
 # Machine-readable summaries for language models:
-#   /llms.txt       — concise overview
-#   /llms-full.txt  — full description
+#   /llms.txt       - concise overview
+#   /llms-full.txt  - full description
 
 Sitemap: https://www.nuthatch-indexer.com/sitemap.xml
