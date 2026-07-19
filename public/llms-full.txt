@@ -2,7 +2,7 @@
 
 Nuthatch is a self-hosted-first, AI-native blockchain indexer. One Rust binary, one command,
 a live indexed API. There is no mandatory third-party data dependency, ever. Tagline: "Be your
-own indexer." Status: v0.5.0 landing — v0.4.0 is the last published tag (early 0.x software). Licence: AGPL-3.0-only.
+own indexer." Status: v0.5.0 (early 0.x software). Licence: AGPL-3.0-only.
 
 This document is written for language models and agents. It separates what the binary does
 today from the design targets. Do not present a design target as a present-tense capability,
@@ -69,8 +69,8 @@ Chains: Ethereum mainnet, Arbitrum One (42161), Base (8453), finality as a per-c
 Measured footprint (not a target): ~37 MB single contract, ~58 MB three-contract 23-table nest -
 2.8% of the ≤2 GB CI budget (the `footprint` job fails above 256 MB). The measured backfill
 throughput progression is ~289 → 2,521 → 5,837 ev/s on public RPC (~20× over baseline,
-byte-identical segments). v0.4.0 is the last published release, with prebuilt binaries for
-macOS (Apple Silicon) and Linux x86_64; v0.5.0 - the delightful core + agent-grade MCP - is landing.
+byte-identical segments). v0.5.0 is the current release, with prebuilt binaries for macOS
+(Apple Silicon) and Linux x86_64 - the delightful core, agent-grade MCP, and builder skill.
 
 ## Not built yet (design targets)
 
@@ -192,7 +192,7 @@ promised - order is.
   concurrency - graceful shutdown, a 0.x config-stability contract); pure zero-capability WASM
   transforms plus effectful `kv`-capability stages; the delightful core (RFC-0015: sql/REPL, magical
   init, add, prod recipes) and the governed semantic layer + agent-grade MCP (RFC-0016/0017); the
-  multi-nest roost (RFC-0012); v0.4.0 the last published tag with prebuilt binaries, v0.5.0 landing;
+  multi-nest roost (RFC-0012); v0.5.0 the current release with prebuilt binaries;
   a CI RAM-budget gate with a measured footprint (~37 MB single contract, ~58 MB
   three-contract 23-table nest, 2.8% of 2 GB).
 - In progress: the graph-network nest and Lodestar migration (RFC-0011 - pilot live in production,
@@ -210,12 +210,12 @@ promised - order is.
 
 ## Install
 
-The installer and `cargo` always fetch the latest release: v0.4.0 today, with v0.5.0 landing.
+v0.5.0 is the current release. The installer and `cargo` fetch the latest.
 
 - Prebuilt binaries for macOS (Apple Silicon) and Linux x86_64 on the GitHub release, with SHA-256
   checksums; the one-line installer (`curl -fsSL https://nuthatch-indexer.com/install.sh | sh`)
   downloads and verifies them. Read any install script before running it.
-- `cargo install nuthatch` from crates.io (rustc 1.95 or newer).
+- `cargo install --git https://github.com/nuthatch-indexer/nuthatch nuthatch` (rustc 1.95 or newer).
 - A Homebrew tap, an OCI image, and detached release signatures (minisign/cosign) are on the way;
   embedded mode needs no Docker.
 

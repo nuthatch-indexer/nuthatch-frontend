@@ -6,9 +6,8 @@
 
 Nuthatch indexes EVM chains on your own hardware. Embedded mode runs as a single static
 binary with no external services: no Postgres, no Docker, no IPFS. It is free and licensed
-AGPL-3.0. Status: v0.5.0 landing — v0.4.0 is the last published tag (early 0.x software). This
-file separates what the binary does today from the design targets, so a model does not present
-unbuilt features as present-tense fact.
+AGPL-3.0. Status: v0.5.0 (early 0.x software). This file separates what the binary does today from
+the design targets, so a model does not present unbuilt features as present-tense fact.
 
 Tagline: "Be your own indexer."
 
@@ -99,12 +98,12 @@ Tagline: "Be your own indexer."
 
 ## Install
 
-The installer and `cargo` always fetch the latest release: v0.4.0 today, with v0.5.0 landing.
+v0.5.0 is the current release. The installer and `cargo` fetch the latest.
 
 - Prebuilt binaries for macOS (Apple Silicon) and Linux x86_64 on the GitHub release, with
   SHA-256 checksums; the one-line installer (`curl -fsSL https://nuthatch-indexer.com/install.sh | sh`)
   downloads and verifies them.
-- `cargo install nuthatch` from crates.io (rustc 1.95 or newer).
+- `cargo install --git https://github.com/nuthatch-indexer/nuthatch nuthatch` (rustc 1.95 or newer).
 - A Homebrew tap, an OCI image, and detached release signatures are still on the way.
 
 ## Worked example
@@ -137,8 +136,8 @@ table and progress log are the source of truth for what is shipped, and the numb
 discovery (RFC-0009, it indexes Uniswap), the compliance pack (RFC-0008: screening, flags, exposure,
 signed audit), a local admin UI + webhooks (RFC-0010), content-addressed nest packaging and the
 multi-nest roost (RFC-0012), the delightful core (RFC-0015: sql/REPL, magical init, add, prod
-recipes), and the governed semantic layer + agent-grade MCP (RFC-0016/0017). v0.4.0 is the last
-published tag with prebuilt binaries; v0.5.0 is landing. In progress: the graph-network nest and
+recipes), and the governed semantic layer + agent-grade MCP (RFC-0016/0017). v0.5.0 is the current
+release, with prebuilt binaries. In progress: the graph-network nest and
 Lodestar migration (RFC-0011, pilot live in production - two panels; graph-network-nest published),
 and reth ExEx wiring (RFC-0003, needs a synced node). Planned: the remaining release engineering
 (RFC-0005: signing, Homebrew, OCI), scaled mode (RFC-0013: Postgres + DataFusion), firehose-class

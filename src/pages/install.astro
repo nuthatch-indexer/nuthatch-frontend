@@ -6,7 +6,7 @@ const GH = 'https://github.com/nuthatch-indexer/nuthatch';
 <Layout
   path="/install"
   title="Install Nuthatch"
-  description="Install Nuthatch: a one-line installer or prebuilt binaries for macOS (Apple Silicon) and Linux x86_64, or cargo install. The installer always fetches the latest release — v0.4.0 today, with v0.5.0 (the delightful core + agent-grade MCP) landing imminently. Checksums verified; a Homebrew tap, an OCI image, and release signatures are on the way."
+  description="Install Nuthatch v0.5.0: a one-line installer or prebuilt binaries for macOS (Apple Silicon) and Linux x86_64, or build from source with cargo. v0.5.0 brings the delightful core and the agent-grade MCP. Checksums verified; a Homebrew tap, an OCI image, and release signatures are on the way."
 >
   <section class="page">
     <div class="wrap narrow">
@@ -19,14 +19,12 @@ const GH = 'https://github.com/nuthatch-indexer/nuthatch';
       </p>
 
       <p class="prerelease-note">
-        <strong>v0.5.0 is landing.</strong> It carries the delightful core (interactive
-        <code>sql</code>, chain auto-detect, <code>add</code>) and the agent-grade MCP surface. The
-        last published tag is <strong>v0.4.0</strong>; the one-line installer and <code>cargo</code>
-        always fetch the latest release, so you'll get 0.5.0 the moment it publishes. Prebuilt
-        binaries ship for macOS (Apple Silicon) and Linux x86_64. Nuthatch is early 0.x software under
-        a config-stability contract - see the <a href="/roadmap">roadmap</a>. A Homebrew tap, an OCI
-        image, and detached release signatures are still on the way; other platforms build from source
-        with <code>cargo</code> for now.
+        <strong>v0.5.0 is out.</strong> It brings the delightful core (interactive <code>sql</code>,
+        chain auto-detect, <code>add</code>) and the agent-grade MCP surface (semantic layer, 12 tools,
+        resources and prompts). Prebuilt binaries ship for macOS (Apple Silicon) and Linux x86_64.
+        Nuthatch is early 0.x software under a config-stability contract - see the
+        <a href="/roadmap">roadmap</a>. A Homebrew tap, an OCI image, and detached release signatures
+        are still on the way; other platforms build from source with <code>cargo</code> for now.
       </p>
 
       <h2 class="ih">Shell script</h2>
@@ -39,8 +37,8 @@ const GH = 'https://github.com/nuthatch-indexer/nuthatch';
       </p>
 
       <h2 class="ih">Cargo</h2>
-      <p>If you have a Rust toolchain (1.95 or newer), build from source off crates.io. No prebuilt binary in the trust path.</p>
-      <CopyBlock command="cargo install nuthatch" />
+      <p>If you have a Rust toolchain (1.95 or newer), build from source straight from the repo. No prebuilt binary in the trust path.</p>
+      <CopyBlock command="cargo install --git https://github.com/nuthatch-indexer/nuthatch nuthatch" />
       <p class="note">
         Or grab a tarball and its <code>.sha256</code> yourself from the
         <a href="https://github.com/nuthatch-indexer/nuthatch/releases/latest" rel="noopener">latest GitHub release</a>.

@@ -1,9 +1,9 @@
 <!-- Regenerate against the repo README + docs/rfcs when either changes materially.
      Ground-truth rule: README / progress log wins over this page.
-     Last regenerated against the progress log through main (v0.5.0 landing): RFC-0015
+     Last regenerated against the progress log through the v0.5.0 release: RFC-0015
      (the delightful core - sql/REPL, magical init, add, prod recipes), RFC-0016 (governed
-     semantic layer + agent-grade MCP) and RFC-0017 (builder skill) all shipped on main;
-     RFC-0012 roost shipped; v0.4.0 is the last published tag.
+     semantic layer + agent-grade MCP) and RFC-0017 (builder skill) all shipped;
+     RFC-0012 roost shipped; v0.5.0 is the current release.
      Keep it product-neutral: describe the binary, not any deployment or commercial
      arrangement. -->
 ---
@@ -153,7 +153,7 @@ const progressLog = `${REPO}#progress-log`;
 
       <p class="grp">Release and footprint</p>
       <ul class="rl">
-        <li>v0.4.0 is the last published release (tagged, with prebuilt binaries on the GitHub release); v0.5.0 - the delightful core + agent-grade MCP - is landing imminently. <code>cargo install</code> builds on rustc 1.95 or newer.</li>
+        <li>v0.5.0 is the current release (tagged, with prebuilt binaries on the GitHub release) - the delightful core, the agent-grade MCP, and the builder skill. <code>cargo install --git</code> builds on rustc 1.95 or newer.</li>
         <li>A CI footprint job fails the build above 256 MB of RAM.</li>
         <li>Measured peak: ≈37 MB for a single contract, ≈58 MB across a three-contract, 23-table nest - 2.8% of the 2 GB budget.</li>
       </ul>
