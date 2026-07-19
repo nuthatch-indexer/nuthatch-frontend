@@ -6,17 +6,28 @@
 
 Nuthatch indexes EVM chains on your own hardware. Embedded mode runs as a single static
 binary with no external services: no Postgres, no Docker, no IPFS. It is free and licensed
-AGPL-3.0. Status: v0.3.0 (early 0.x software). This file separates what the binary does today
-from the design targets, so a model does not present unbuilt features as present-tense fact.
+AGPL-3.0. Status: v0.5.0 landing — v0.4.0 is the last published tag (early 0.x software). This
+file separates what the binary does today from the design targets, so a model does not present
+unbuilt features as present-tense fact.
 
 Tagline: "Be your own indexer."
 
 ## What it does today
 
-- `nuthatch init 0xAddr [0xAddr…] --chain <mainnet|arbitrum-one|base>` resolves each contract's
+- `nuthatch init 0xAddr [0xAddr…] [--chain <mainnet|arbitrum-one|base>]` resolves each contract's
   ABI (Sourcify, then an Etherscan-class API; EIP-1967/legacy-OZ proxies resolved) and scaffolds a
-  multi-contract nest: `nuthatch.toml`, `abis/`, a `schema.json`, an `llms.txt`, and a Claude Code
-  skill. It does not yet generate views, handlers, or tests from the ABI.
+  multi-contract nest: `nuthatch.toml`, `abis/`, a `schema.json`, a `semantic.toml` (per-nest
+  meaning, seeded from the ABI), an `llms.txt`, and a Claude Code skill. Omit `--chain` and nuthatch
+  probes each supported chain for the contract's bytecode. It does not yet generate views, handlers,
+  or tests from the ABI.
+- `nuthatch sql "…"` runs one-shot SQL from the terminal (aligned table, `--json` to pipe), or opens
+  an interactive REPL (`.tables`/`.schema`, history) when given no query. `nuthatch add 0xAddr` grows
+  a nest with another contract without re-init. `nuthatch mcp --print-config` prints a copy-paste MCP
+  client config; systemd/docker recipes run `dev` unattended.
+- Governed semantic layer (RFC-0016): the `semantic.toml` drives an enriched `schema` (meaning +
+  hot/cold coverage seam + derived footguns); a failed query returns a one-line fix hint and `explain`
+  validates a query without executing it; MCP results are compact tables with a citable provenance
+  stamp (`as of block N, sealed_through M, registry <hash>`).
 - `nuthatch dev` polls logs over RPC (round-robin failover, adaptive `getLogs` chunking), decodes
   every declared event of every contract (topic0 registry → one table per `{alias}__{event}`),
   stores rows in an embedded hot store (redb), seals finalized ranges to content-addressed Parquet
@@ -34,9 +45,10 @@ Tagline: "Be your own indexer."
   public RPC, byte-identical segments). Operator surface: `/metrics`, `/sql` guards (timeout, row
   cap, concurrency), graceful shutdown on SIGTERM.
 - `nuthatch transform <component.wasm>` runs a pure, zero-capability WASM transform over an Arrow
-  batch. `nuthatch mcp` serves the Model Context Protocol over stdio (11 tools: status, schema,
-  tables, table, sql, entity, balance, top_balances, flags, exposure, screen_status), bridging
-  offline to a running instance.
+  batch. `nuthatch mcp` serves the Model Context Protocol over stdio (12 tools: status, schema,
+  tables, table, sql, explain, entity, balance, top_balances, flags, exposure, screen_status; plus 3
+  resources — nuthatch://schema|tables|status — and 3 prompts: profile-contract, investigate-address,
+  verify-a-number), bridging offline to a running instance.
 - Factories and dynamic contract discovery (RFC-0009): `[[templates]]`/`[[factories]]` index the
   child contracts a factory deploys at runtime (it indexes Uniswap), tip + backfill + reorg-safe,
   with a `{template}__children` view.
@@ -62,7 +74,7 @@ Tagline: "Be your own indexer."
   multi-nest roost runtime (two nests, one cursor - RFC-0012, packaging shipped, roost not yet).
 - Generated schema, views, and tests from an ABI or a subgraph manifest; a GraphQL compatibility
   layer; streaming subscribe (SSE); local AI models (Ollama / bring-your-own-key); effectful HTTP
-  egress for transform worlds (`kv` grant ships today); a governed semantic layer; wildcard indexing.
+  egress for transform worlds (`kv` grant ships today); wildcard indexing.
 
 ## How it works
 
@@ -85,7 +97,9 @@ Tagline: "Be your own indexer."
 - AI-native today: a built-in MCP server, a `schema` tool, and a shipped `llms.txt` and Claude
   Code skill, all offline against your local instance. Local models (Ollama / BYO-key) are planned.
 
-## Install (v0.3.0)
+## Install
+
+The installer and `cargo` always fetch the latest release: v0.4.0 today, with v0.5.0 landing.
 
 - Prebuilt binaries for macOS (Apple Silicon) and Linux x86_64 on the GitHub release, with
   SHA-256 checksums; the one-line installer (`curl -fsSL https://nuthatch-indexer.com/install.sh | sh`)
@@ -99,7 +113,7 @@ Tagline: "Be your own indexer."
 credited to Paul Barba) as a Nuthatch nest - Graph Horizon staking on Arbitrum One across three
 contracts, one `init` over several addresses, per-event tables queryable during backfill,
 AssemblyScript handlers rebuilt as declarative `views/*.sql` (reorgs retract; no rollback code),
-and parity via `nuthatch check`. Most of it runs on v0.3.0; the auto-generated GraphQL layer, SSE
+and parity via `nuthatch check`. Most of it runs on v0.5.0; the auto-generated GraphQL layer, SSE
 streams, and AI-assisted schema/test generation are marked as design targets.
 
 ## Who runs it
@@ -107,7 +121,7 @@ streams, and AI-assisted schema/test generation are marked as design targets.
 `/stories` answers "is this for me?" through three illustrative personas (not testimonials),
 each mapped to one of the three front doors: an SQL endpoint for application backends, published
 nests for analysts who write no indexing code, and the built-in MCP server for agents. These
-workflows run on v0.3.0 - multi-contract nests, every declared event as a table, Arbitrum One and
+workflows run on v0.5.0 - multi-contract nests, every declared event as a table, Arbitrum One and
 Base, user-authored views, `init --from`, `/sql`, and MCP all ship, as do factories, the compliance
 pack, the admin UI, and webhooks. The main forward-looking piece for these stories is a GraphQL
 layer for subgraph-shaped clients. It notes that derived views read finalized data while raw event
@@ -121,13 +135,14 @@ table and progress log are the source of truth for what is shipped, and the numb
 (Ethereum mainnet + Arbitrum One + Base), the measured ~20× seal-direct/pipelined backfill
 (RFC-0004), the operator surface (`/metrics`, `/sql` guards, graceful shutdown), factory/dynamic
 discovery (RFC-0009, it indexes Uniswap), the compliance pack (RFC-0008: screening, flags, exposure,
-signed audit), a local admin UI + webhooks (RFC-0010), content-addressed nest packaging (RFC-0012
-`nest pack`/`mount`), and the tagged v0.3.0 release on crates.io with prebuilt binaries. In progress:
-the graph-network nest and Lodestar migration (RFC-0011, pilot live in production - two panels),
-the multi-nest roost runtime (RFC-0012), and reth ExEx wiring (RFC-0003, needs a synced node).
-Planned: the remaining release engineering (RFC-0005: signing, Homebrew, OCI), scaled mode
-(RFC-0013: Postgres + DataFusion), firehose-class extraction (RFC-0014), a GraphQL layer, a semantic
-layer, IVM generalisation, and wildcard indexing. Not planned: a token or decentralized-network
+signed audit), a local admin UI + webhooks (RFC-0010), content-addressed nest packaging and the
+multi-nest roost (RFC-0012), the delightful core (RFC-0015: sql/REPL, magical init, add, prod
+recipes), and the governed semantic layer + agent-grade MCP (RFC-0016/0017). v0.4.0 is the last
+published tag with prebuilt binaries; v0.5.0 is landing. In progress: the graph-network nest and
+Lodestar migration (RFC-0011, pilot live in production - two panels; graph-network-nest published),
+and reth ExEx wiring (RFC-0003, needs a synced node). Planned: the remaining release engineering
+(RFC-0005: signing, Homebrew, OCI), scaled mode (RFC-0013: Postgres + DataFusion), firehose-class
+extraction (RFC-0014), a GraphQL layer, IVM generalisation, and wildcard indexing. Not planned: a token or decentralized-network
 features, telemetry, a Kubernetes-first deployment, and any gateway/auth/metering layer in the
 core. It promises order, not dates, and defers to the README progress log when the two disagree.
 

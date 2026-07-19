@@ -6,7 +6,7 @@ const GH = 'https://github.com/nuthatch-indexer/nuthatch';
 <Layout
   path="/install"
   title="Install Nuthatch"
-  description="Install Nuthatch v0.3.0: a one-line installer or prebuilt binaries for macOS (Apple Silicon) and Linux x86_64, or cargo install from crates.io. Checksums verified; a Homebrew tap, an OCI image, and release signatures are on the way."
+  description="Install Nuthatch: a one-line installer or prebuilt binaries for macOS (Apple Silicon) and Linux x86_64, or cargo install. The installer always fetches the latest release — v0.4.0 today, with v0.5.0 (the delightful core + agent-grade MCP) landing imminently. Checksums verified; a Homebrew tap, an OCI image, and release signatures are on the way."
 >
   <section class="page">
     <div class="wrap narrow">
@@ -19,11 +19,14 @@ const GH = 'https://github.com/nuthatch-indexer/nuthatch';
       </p>
 
       <p class="prerelease-note">
-        <strong>v0.3.0 is out.</strong> Prebuilt binaries ship for macOS (Apple Silicon) and Linux
-        x86_64, and the crate is on crates.io. Nuthatch is early 0.x software under a config-stability
-        contract - see the <a href="/roadmap">roadmap</a>. A Homebrew tap, an OCI image, and detached
-        release signatures are still on the way; other platforms build from source with
-        <code>cargo</code> for now.
+        <strong>v0.5.0 is landing.</strong> It carries the delightful core (interactive
+        <code>sql</code>, chain auto-detect, <code>add</code>) and the agent-grade MCP surface. The
+        last published tag is <strong>v0.4.0</strong>; the one-line installer and <code>cargo</code>
+        always fetch the latest release, so you'll get 0.5.0 the moment it publishes. Prebuilt
+        binaries ship for macOS (Apple Silicon) and Linux x86_64. Nuthatch is early 0.x software under
+        a config-stability contract - see the <a href="/roadmap">roadmap</a>. A Homebrew tap, an OCI
+        image, and detached release signatures are still on the way; other platforms build from source
+        with <code>cargo</code> for now.
       </p>
 
       <h2 class="ih">Shell script</h2>
@@ -79,7 +82,7 @@ const GH = 'https://github.com/nuthatch-indexer/nuthatch';
       <div class="keybox">
         <span class="keybox-label">Detached signatures <span class="tag">planned</span></span>
         <p class="keybox-note">
-          v0.3.0 ships checksums but not yet detached signatures. Minisign and cosign signing, with a
+          Releases ship checksums but not yet detached signatures. Minisign and cosign signing, with a
           published key, land with the remaining release engineering - see the
           <a href="/roadmap">roadmap</a>. Until then, verify the checksum.
         </p>

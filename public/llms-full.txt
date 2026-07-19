@@ -2,7 +2,7 @@
 
 Nuthatch is a self-hosted-first, AI-native blockchain indexer. One Rust binary, one command,
 a live indexed API. There is no mandatory third-party data dependency, ever. Tagline: "Be your
-own indexer." Status: v0.3.0 (early 0.x software). Licence: AGPL-3.0-only.
+own indexer." Status: v0.5.0 landing — v0.4.0 is the last published tag (early 0.x software). Licence: AGPL-3.0-only.
 
 This document is written for language models and agents. It separates what the binary does
 today from the design targets. Do not present a design target as a present-tense capability,
@@ -48,8 +48,12 @@ obstacle has been the operational weight of the tooling, which is an engineering
    pack`/`mount` build and verify a content-addressed nest blob (RFC-0012).
 4. `nuthatch transform <component.wasm>` - runs a pure, zero-capability WASM transform over an Arrow
    batch; effectful stages take per-component capability grants (`kv` today). `nuthatch mcp` -
-   serves the Model Context Protocol over stdio (11 tools: status, schema, tables, table, sql,
-   entity, balance, top_balances, flags, exposure, screen_status).
+   serves the Model Context Protocol over stdio (12 tools: status, schema, tables, table, sql,
+   explain, entity, balance, top_balances, flags, exposure, screen_status; plus 3 resources —
+   nuthatch://schema|tables|status — and 3 prompts: profile-contract, investigate-address,
+   verify-a-number). Governed semantic layer (RFC-0016): the `schema` tool serves this nest's
+   meaning; failed queries return fix hints and `explain` validates without executing; results carry
+   a citable provenance stamp.
 5. Factories and dynamic contract discovery (RFC-0009): `[[templates]]`/`[[factories]]` index the
    child contracts a factory deploys at runtime - tip, backfill, reorg-safe, with a
    `{template}__children` view. It indexes Uniswap.
@@ -65,8 +69,8 @@ Chains: Ethereum mainnet, Arbitrum One (42161), Base (8453), finality as a per-c
 Measured footprint (not a target): ~37 MB single contract, ~58 MB three-contract 23-table nest -
 2.8% of the ≤2 GB CI budget (the `footprint` job fails above 256 MB). The measured backfill
 throughput progression is ~289 → 2,521 → 5,837 ev/s on public RPC (~20× over baseline,
-byte-identical segments). v0.3.0 is the current release, on crates.io, with prebuilt binaries for
-macOS (Apple Silicon) and Linux x86_64.
+byte-identical segments). v0.4.0 is the last published release, with prebuilt binaries for
+macOS (Apple Silicon) and Linux x86_64; v0.5.0 - the delightful core + agent-grade MCP - is landing.
 
 ## Not built yet (design targets)
 
@@ -76,7 +80,7 @@ mode (Postgres + DataFusion federation, RFC-0013 direction record); the multi-ne
 (two nests, one cursor - RFC-0012, packaging shipped, roost not yet); generated schema, views, and
 tests from an ABI; subgraph migration (`init --from-subgraph`); a GraphQL compatibility layer;
 streaming subscribe (SSE); local AI models (Ollama / bring-your-own-key); effectful HTTP egress for
-transform worlds (`kv` grant ships today); a governed semantic layer; wildcard indexing. Chains
+transform worlds (`kv` grant ships today); wildcard indexing. Chains
 beyond Ethereum mainnet, Arbitrum One, and Base are not built.
 
 ## Architecture
@@ -117,7 +121,7 @@ segments - no trusted execution environments and no zero-knowledge proofs.
 
 - A built-in MCP server is compiled into the binary: schema discovery, table listing and reads, SQL
   execution, entity and balance lookup, plus compliance flags, counterparty exposure, and sanctions
-  screening (11 tools). It works fully offline, bridging to a running local instance.
+  screening (12 tools, 3 resources, 3 prompts). It works fully offline, bridging to a running local instance.
 - `init` ships an `llms.txt` and a Claude Code skill so coding agents get the real query surface
   instead of guessing. Generating an indexer with tests from an ABI is a design target.
 - Local models via Ollama or a bring-your-own key are planned. LLM output generates code and
@@ -143,7 +147,7 @@ PaulieB14/horizon-indexer-subgraph, credited to Paul Barba's "Horizon Indexer Pe
 subgraph - as a Nuthatch nest: Graph Horizon staking on Arbitrum One across three contracts, one
 `init` over several addresses, per-event tables queryable during backfill, AssemblyScript handlers
 rebuilt as declarative `views/*.sql` (reorgs retract; no hand-written rollback), a shareable nest
-consumed via `nuthatch init --from`, and parity via `nuthatch check`. All of that runs on v0.3.0.
+consumed via `nuthatch init --from`, and parity via `nuthatch check`. All of that runs on v0.5.0.
 Still design targets, marked as such on the page: an auto-generated GraphQL layer, SSE streams, and
 AI-assisted schema/test generation from an ABI or a subgraph manifest (`init --from-subgraph`).
 
@@ -153,7 +157,7 @@ The page at https://www.nuthatch-indexer.com/stories answers "is this for me?" t
 illustrative personas - not testimonials, first names only - each traced end to end through one of
 the three front doors: an SQL endpoint (`POST /sql`) for application backends, published nests for
 analysts who write no indexing code, and the built-in MCP server for agents. These workflows run on
-v0.3.0: multi-contract nests, every declared event as a table, Arbitrum One and Base, user-authored
+v0.5.0: multi-contract nests, every declared event as a table, Arbitrum One and Base, user-authored
 views, `init --from`, `/sql`, and MCP all ship, as do factories, the compliance pack, the admin UI,
 and webhooks. The main forward-looking piece for these stories is a GraphQL layer for subgraph-shaped
 clients. The page also names one real production user - Lodestar, a public Graph Protocol dashboard,
@@ -186,8 +190,10 @@ promised - order is.
   with HMAC-signed egress (RFC-0010); content-addressed nest packaging (RFC-0012 - `nest pack`/
   `mount`); the operator surface (Prometheus `/metrics`, `/sql` guards - timeout, row cap,
   concurrency - graceful shutdown, a 0.x config-stability contract); pure zero-capability WASM
-  transforms plus effectful `kv`-capability stages; the tagged v0.3.0 release on crates.io with
-  prebuilt binaries; a CI RAM-budget gate with a measured footprint (~37 MB single contract, ~58 MB
+  transforms plus effectful `kv`-capability stages; the delightful core (RFC-0015: sql/REPL, magical
+  init, add, prod recipes) and the governed semantic layer + agent-grade MCP (RFC-0016/0017); the
+  multi-nest roost (RFC-0012); v0.4.0 the last published tag with prebuilt binaries, v0.5.0 landing;
+  a CI RAM-budget gate with a measured footprint (~37 MB single contract, ~58 MB
   three-contract 23-table nest, 2.8% of 2 GB).
 - In progress: the graph-network nest and Lodestar migration (RFC-0011 - pilot live in production,
   two panels serving from one nuthatch binary; remaining panels and the published nest outstanding);
@@ -197,12 +203,14 @@ promised - order is.
 - Planned: the remaining release engineering (RFC-0005 - signed artifacts, a Homebrew tap, an OCI
   image); scaled mode (RFC-0013 - Postgres hot store + DataFusion federation, direction recorded);
   firehose-class extraction of traces and state diffs (RFC-0014, gated on ExEx); a GraphQL
-  compatibility layer; a governed semantic layer + NL queries; IVM generalisation; effectful HTTP
+  compatibility layer; IVM generalisation; effectful HTTP
   egress for transform worlds; wildcard indexing.
 - Not planned: a token or decentralized-network features, telemetry of any kind, a Kubernetes-first
   deployment, and any gateway/auth/metering layer in the core.
 
-## Install (v0.3.0)
+## Install
+
+The installer and `cargo` always fetch the latest release: v0.4.0 today, with v0.5.0 landing.
 
 - Prebuilt binaries for macOS (Apple Silicon) and Linux x86_64 on the GitHub release, with SHA-256
   checksums; the one-line installer (`curl -fsSL https://nuthatch-indexer.com/install.sh | sh`)

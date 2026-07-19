@@ -1,8 +1,9 @@
 <!-- Regenerate against the repo README + docs/rfcs when either changes materially.
      Ground-truth rule: README / progress log wins over this page.
-     Last regenerated against the progress log through the v0.3.0 release: RFC-0008
-     (compliance pack), RFC-0009 (factories), RFC-0010 (admin UI + webhooks) all shipped;
-     RFC-0011 (Lodestar) pilot live in production; RFC-0012 (nest packaging) partial.
+     Last regenerated against the progress log through main (v0.5.0 landing): RFC-0015
+     (the delightful core - sql/REPL, magical init, add, prod recipes), RFC-0016 (governed
+     semantic layer + agent-grade MCP) and RFC-0017 (builder skill) all shipped on main;
+     RFC-0012 roost shipped; v0.4.0 is the last published tag.
      Keep it product-neutral: describe the binary, not any deployment or commercial
      arrangement. -->
 ---
@@ -24,6 +25,9 @@ const RFCS = {
   '0012': '0012-multi-nest-runtime-and-nest-packaging.md',
   '0013': '0013-storage-and-query-engine-direction.md',
   '0014': '0014-firehose-class-extraction-traces-and-state.md',
+  '0015': '0015-the-delightful-core.md',
+  '0016': '0016-governed-semantic-layer-and-agent-grade-mcp.md',
+  '0017': '0017-builder-skill.md',
 };
 const rfc = (n) => `${REPO}/blob/main/docs/rfcs/${RFCS[n]}`;
 const rfcsDir = `${REPO}/tree/main/docs/rfcs`;
@@ -63,7 +67,25 @@ const progressLog = `${REPO}#progress-log`;
         <li>Finality-gated, content-addressed Parquet sealing, with the hot store pruned once every table's segment is durable.</li>
         <li>Read-only analytical SQL over sealed segments (DuckDB), plus <code>GET /tables</code> and <code>GET /table/{'{'}name{'}'}</code> merging hot and cold - the full data model.</li>
         <li>Balance view maintained incrementally (DBSP): i128 base units serialised as decimal strings, a reorg is a retraction, and it replays from stored facts on restart.</li>
-        <li>Serving over HTTP and MCP: the MCP server speaks stdio with 11 tools, fully offline.</li>
+        <li>Serving over HTTP and MCP: the MCP server speaks stdio, fully offline (see the agent-grade MCP surface below).</li>
+      </ul>
+
+      <p class="grp">The delightful core (<a href={rfc('0015')} rel="noopener">RFC-0015</a>)</p>
+      <ul class="rl">
+        <li><code>nuthatch sql</code> - one-shot SQL from the terminal (aligned table, <code>--json</code> to pipe), plus an interactive REPL with <code>.tables</code>/<code>.schema</code>, history and line editing. Queries the local store when <code>dev</code> is stopped, and falls back to the running instance when it holds the writer.</li>
+        <li>Magical <code>init</code> - omit <code>--chain</code> and nuthatch probes each supported chain for your contract's bytecode and picks the one it lives on.</li>
+        <li><code>nuthatch add</code> - grow a nest with another contract, no re-init; existing contracts resume from their cursor while the new one backfills from its deployment.</li>
+        <li>Live backfill feedback - a progress line while it catches up, and a clear "caught up to tip" the moment it does.</li>
+        <li>Production recipes - <code>nuthatch mcp --print-config</code> prints a copy-paste MCP config, and systemd / docker unit recipes run <code>dev</code> unattended.</li>
+      </ul>
+
+      <p class="grp">Governed semantic layer &amp; agent-grade MCP (<a href={rfc('0016')} rel="noopener">RFC-0016</a>, <a href={rfc('0017')} rel="noopener">RFC-0017</a>)</p>
+      <ul class="rl">
+        <li>A per-nest semantic layer (<code>semantic.toml</code>, seeded from the ABI at <code>init</code>): the <code>schema</code> tool serves <em>this</em> nest's meaning - table/column descriptions, the hot/cold coverage seam, and derived footguns (reserved-word and big-int columns) - not one static string for every nest.</li>
+        <li>Errors as prompts - a failed query returns a one-line fix hint (nearest real table/column, reserved word, big-int) over the raw engine message; <code>explain</code> validates a query without executing it, so an agent self-corrects in one round-trip.</li>
+        <li>Result shaping + provenance - MCP results come back as compact aligned tables with truncation-as-guidance and a citable stamp (<code>as of block N, sealed_through M, registry &lt;hash&gt;</code>).</li>
+        <li>The full MCP surface - 12 tools, 3 resources (<code>nuthatch://schema|tables|status</code>), and 3 prompts (<code>profile-contract</code>, <code>investigate-address</code>, <code>verify-a-number</code>), all offline; nothing in the data path touched.</li>
+        <li>A repo-installable Claude Code skill (<a href={rfc('0017')} rel="noopener">RFC-0017</a>) teaches an agent to <em>drive</em> nuthatch - init, config, factories, roost, ops - with CLI/config references generated from the source and CI-checked for drift.</li>
       </ul>
 
       <p class="grp">Nests</p>
@@ -126,11 +148,12 @@ const progressLog = `${REPO}#progress-log`;
       <p class="grp">Nest packaging (<a href={rfc('0012')} rel="noopener">RFC-0012</a>)</p>
       <ul class="rl">
         <li><code>nuthatch nest pack</code> bundles a nest's authored inputs into a content-addressed blob whose hash is a Merkle root over a canonical manifest; <code>nest mount</code> verifies and installs one, regenerating the decode registry from the installed inputs and asserting it matches the author's pinned hash - determinism carried across the wire, not just the disk.</li>
+        <li><code>nuthatch roost</code> - one runtime hosts several nests on the same chain under a single cursor, one hot store, and one finality view, with strict per-nest isolation and a per-runtime RSS budget: a mount whose projection exceeds the budget is refused before it starts. Verified live on Arbitrum.</li>
       </ul>
 
       <p class="grp">Release and footprint</p>
       <ul class="rl">
-        <li>v0.3.0 is the current release, tagged and published to crates.io, with prebuilt binaries on the GitHub release; <code>cargo install</code> builds on rustc 1.95 or newer.</li>
+        <li>v0.4.0 is the last published release (tagged, with prebuilt binaries on the GitHub release); v0.5.0 - the delightful core + agent-grade MCP - is landing imminently. <code>cargo install</code> builds on rustc 1.95 or newer.</li>
         <li>A CI footprint job fails the build above 256 MB of RAM.</li>
         <li>Measured peak: ≈37 MB for a single contract, ≈58 MB across a three-contract, 23-table nest - 2.8% of the 2 GB budget.</li>
       </ul>
@@ -142,13 +165,9 @@ const progressLog = `${REPO}#progress-log`;
           The graph-network nest and Lodestar migration (<a href={rfc('0011')} rel="noopener">RFC-0011</a>):
           the pilot is live in production - two of a public dashboard's panels serve from a single
           nuthatch binary instead of The Graph gateway, each parity-checked before cutover
-          (<a href="/stories">the story is here</a>). The wedge is proven; migrating the remaining
-          panels and publishing the full graph-network nest is the outstanding work.
-        </li>
-        <li>
-          The multi-nest roost runtime (<a href={rfc('0012')} rel="noopener">RFC-0012</a>): the
-          content-addressed <code>nest pack</code>/<code>mount</code> round-trip ships today; the roost
-          - two nests under one cursor in one process - is next.
+          (<a href="/stories">the story is here</a>). A <a href="https://github.com/nuthatch-indexer/graph-network-nest" rel="noopener">published <code>graph-network-nest</code></a>
+          now carries the Horizon staking/service surface; migrating the remaining panels (Indexer
+          Directory, Curation, Epochs) into it is the outstanding work.
         </li>
         <li>
           reth ExEx wiring (<a href={rfc('0003')} rel="noopener">RFC-0003</a>): the <code>Source</code>
@@ -178,7 +197,6 @@ const progressLog = `${REPO}#progress-log`;
           ExEx to a synced node.
         </li>
         <li>A GraphQL compatibility layer <span class="rfc-todo">(RFC to come)</span> - for subgraph-shaped clients.</li>
-        <li>A governed semantic layer with natural-language queries <span class="rfc-todo">(RFC to come)</span> - the model reads a schema, not a guess.</li>
         <li>IVM generalisation <span class="rfc-todo">(RFC to come)</span> - lift more derived views from DuckDB SQL over sealed data into incrementally-maintained views.</li>
         <li>Effectful HTTP egress for transform worlds <span class="rfc-todo">(RFC to come)</span> - a <code>wasi:http</code> sandboxed variant beyond today's <code>kv</code> capability grant.</li>
         <li>Wildcard, signature-scoped indexing <span class="rfc-todo">(RFC to come)</span> - index an event by its signature across every emitter.</li>
