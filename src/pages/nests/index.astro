@@ -1,0 +1,227 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import CopyBlock from '../../components/CopyBlock.astro';
+import { getCollection } from 'astro:content';
+
+const all = await getCollection('nests');
+
+// Group by honest status — lead with what works, never dress up vaporware.
+const order = { available: 0, building: 1, planned: 2 } as const;
+const byTier = (a: { data: { tier: number } }, b: { data: { tier: number } }) => a.data.tier - b.data.tier;
+
+const groups = [
+  {
+    key: 'available',
+    title: 'Available now',
+    blurb: 'Works today. Generated straight from a contract address — no repo to clone.',
+    items: all.filter((n) => n.data.status === 'available').sort(byTier),
+  },
+  {
+    key: 'building',
+    title: 'Building',
+    blurb: 'Running in the wild, being packaged into a published nest on the org.',
+    items: all.filter((n) => n.data.status === 'building').sort(byTier),
+  },
+  {
+    key: 'planned',
+    title: 'Planned',
+    blurb: 'On the catalogue, demand-ranked. Not built yet — no fake install commands.',
+    items: all.filter((n) => n.data.status === 'planned').sort(byTier),
+  },
+];
+
+const statusLabel = { available: 'available', building: 'building', planned: 'planned' } as const;
+const tierLabel = (t: number) => (t === 0 ? 'Tier 0 · beachhead' : `Tier ${t}`);
+---
+<Layout
+  path="/nests"
+  title="Nests - Nuthatch"
+  description="The nest catalogue: prebuilt indexing definitions for the protocols people usually rent The Graph or Goldsky for. Self-hosted, content-addressed, nothing phoning home."
+>
+  <section class="page">
+    <div class="wrap">
+      <p class="section-label">Nests</p>
+      <h1>The nest catalogue</h1>
+      <p class="lede">
+        A <strong>nest</strong> is a packaged indexing definition — ABIs, decoded event tables and
+        declarative views — for a contract or protocol. Point Nuthatch at one and you get a
+        self-hosted equivalent of the subgraph you'd otherwise rent.
+      </p>
+
+      <div class="how">
+        <p>
+          Nests live as git repos on
+          <a href="https://github.com/nuthatch-indexer" rel="noopener">github.com/nuthatch-indexer</a>.
+          Consuming one is a clone; publishing one is a <code>git push</code>. This page is a
+          catalogue for humans — it hands you a URL, your machine fetches from GitHub. Nothing routes
+          through us.
+        </p>
+        <div class="how-cmds">
+          <div>
+            <span class="how-cap">From a published nest</span>
+            <CopyBlock command="nuthatch init --from https://github.com/nuthatch-indexer/&lt;nest&gt;" />
+          </div>
+          <div>
+            <span class="how-cap">Or straight from an address</span>
+            <CopyBlock command="nuthatch init 0xYourContract --chain mainnet" />
+          </div>
+        </div>
+        <p class="how-foot">
+          The full demand-ranked reasoning behind these picks lives in the
+          <a href="https://github.com/nuthatch-indexer/nuthatch/blob/main/docs/nest-catalogue.md" rel="noopener">nest-catalogue</a>
+          in the repo.
+        </p>
+      </div>
+
+      {groups.filter((g) => g.items.length > 0).map((g) => (
+        <section class="group">
+          <div class="group-head">
+            <h2>{g.title}</h2>
+            <span class={`count status--${g.key}`}>{g.items.length}</span>
+          </div>
+          <p class="group-blurb">{g.blurb}</p>
+
+          <ul class="grid">
+            {g.items.map((n) => (
+              <li class="nest">
+                <div class="nest-top">
+                  <h3>{n.data.name}</h3>
+                  <span class={`badge status--${n.data.status}`}>{statusLabel[n.data.status]}</span>
+                </div>
+
+                <div class="meta">
+                  <span class="tag">{n.data.category}</span>
+                  <span class={`tag tier tier--${n.data.tier}`}>{tierLabel(n.data.tier)}</span>
+                  {n.data.factory && <span class="tag factory">factory</span>}
+                  <span class="tag cx">{n.data.complexity}</span>
+                </div>
+
+                <p class="summary">{n.data.summary}</p>
+
+                <p class="events"><span class="events-cap">events</span> {n.data.events}</p>
+
+                <div class="chains">
+                  {n.data.chains.map((c) => <span class="chain">{c}</span>)}
+                </div>
+
+                {n.data.command && (
+                  <div class="cmd"><CopyBlock command={n.data.command} size="md" /></div>
+                )}
+
+                {n.data.note && <p class="note">{n.data.note}</p>}
+              </li>
+            ))}
+          </ul>
+        </section>
+      ))}
+    </div>
+  </section>
+</Layout>
+
+<style>
+  .page { padding-block: clamp(3rem, 6vw, 4.5rem) clamp(4rem, 9vw, 6.5rem); }
+  h1 { margin-bottom: 0.8rem; }
+  .lede {
+    color: var(--text-muted); font-size: 1.08rem; line-height: 1.7;
+    margin-bottom: 2rem; max-width: 58ch;
+  }
+  .lede strong { color: var(--text); }
+
+  /* How-to panel */
+  .how {
+    border: 1px solid var(--border); border-radius: var(--radius);
+    background: var(--bg-elev); padding: 1.4rem 1.5rem;
+    margin-bottom: 3.5rem;
+  }
+  .how > p { color: var(--text-muted); font-size: 0.96rem; line-height: 1.65; max-width: 70ch; }
+  .how code {
+    background: var(--bg-inset); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); padding: 0.05rem 0.35rem; font-size: 0.85em;
+  }
+  .how-cmds {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(19rem, 1fr));
+    gap: 1rem; margin-top: 1.2rem;
+  }
+  .how-cap, .events-cap {
+    display: block; font-family: 'JetBrains Mono', monospace;
+    font-size: 0.68rem; letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--text-faint); margin-bottom: 0.5rem;
+  }
+  .how-foot { margin-top: 1.2rem; font-size: 0.9rem; color: var(--text-faint); }
+
+  /* Status group */
+  .group { margin-top: 3.2rem; }
+  .group-head { display: flex; align-items: center; gap: 0.7rem; }
+  .group-head h2 { font-size: clamp(1.3rem, 2.6vw, 1.6rem); }
+  .count {
+    font-family: 'JetBrains Mono', monospace; font-size: 0.78rem;
+    border-radius: 9999px; padding: 0.1rem 0.55rem; border: 1px solid var(--border);
+    color: var(--text-muted);
+  }
+  .group-blurb { color: var(--text-muted); font-size: 0.96rem; margin: 0.5rem 0 1.6rem; max-width: 60ch; }
+
+  /* Card grid */
+  .grid {
+    list-style: none; margin: 0; padding: 0;
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(20rem, 1fr));
+    gap: 1rem;
+  }
+  .nest {
+    border: 1px solid var(--border); border-radius: var(--radius);
+    background: var(--bg-elev); padding: 1.2rem 1.25rem 1.3rem;
+    display: flex; flex-direction: column;
+    transition: border-color 0.18s var(--ease);
+  }
+  .nest:hover { border-color: var(--border-hi); }
+  .nest-top { display: flex; align-items: baseline; justify-content: space-between; gap: 0.6rem; }
+  .nest-top h3 { font-size: 1.1rem; color: var(--text); }
+
+  .badge {
+    flex-shrink: 0;
+    font-family: 'JetBrains Mono', monospace; font-size: 0.64rem;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    padding: 0.18rem 0.5rem; border-radius: 9999px; border: 1px solid transparent;
+  }
+  .status--available { color: var(--ok); background: var(--pale-green-bg); border-color: color-mix(in srgb, var(--ok) 30%, transparent); }
+  .status--building { color: var(--warn); background: color-mix(in srgb, var(--warn) 12%, transparent); border-color: color-mix(in srgb, var(--warn) 30%, transparent); }
+  .status--planned { color: var(--text-faint); background: transparent; border-color: var(--border); }
+  /* group count reuses status colours for its text only */
+  .count.status--available { color: var(--ok); }
+  .count.status--building { color: var(--warn); }
+  .count.status--planned { color: var(--text-muted); }
+
+  .meta { display: flex; flex-wrap: wrap; gap: 0.4rem; margin: 0.7rem 0 0.9rem; }
+  .tag {
+    font-family: 'JetBrains Mono', monospace; font-size: 0.66rem;
+    color: var(--text-muted); background: var(--bg-inset);
+    border: 1px solid var(--border); border-radius: var(--radius-sm);
+    padding: 0.16rem 0.45rem;
+  }
+  .tier--0 { color: var(--rust); border-color: color-mix(in srgb, var(--rust) 35%, transparent); background: var(--pale-rust-bg); }
+  .factory { color: var(--accent); border-color: color-mix(in srgb, var(--accent) 30%, transparent); background: var(--pale-blue-bg); }
+  .cx { text-transform: capitalize; }
+
+  .summary { color: var(--text-muted); font-size: 0.94rem; line-height: 1.6; margin: 0; }
+
+  .events {
+    margin: 0.9rem 0 0; font-family: 'JetBrains Mono', monospace;
+    font-size: 0.74rem; line-height: 1.55; color: var(--text-faint);
+  }
+  .events-cap { display: inline; margin-right: 0.4rem; color: var(--text-faint); }
+
+  .chains { display: flex; flex-wrap: wrap; gap: 0.35rem; margin-top: 0.9rem; }
+  .chain {
+    font-family: 'JetBrains Mono', monospace; font-size: 0.66rem;
+    color: var(--text-muted); border: 1px solid var(--border);
+    border-radius: 9999px; padding: 0.12rem 0.5rem;
+  }
+
+  .cmd { margin-top: 1rem; }
+  .note {
+    margin: 0.95rem 0 0; padding-top: 0.85rem; border-top: 1px solid var(--border);
+    font-size: 0.82rem; line-height: 1.55; color: var(--text-faint);
+  }
+
+  /* Push the command / note to the card bottom so cards align */
+  .cmd, .note:last-child { margin-top: auto; }
+</style>
