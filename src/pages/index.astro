@@ -7,16 +7,16 @@ import Pipeline from '../components/Pipeline.astro';
 const GH = 'https://github.com/nuthatch-indexer/nuthatch';
 
 // Comparison rows. mark: 'yes' | 'no' | 'part' | text-only via `text`.
-const cols = ['Nuthatch', 'The Graph', 'Goldsky', 'Ponder'];
+const cols = ['Nuthatch', 'The Graph', 'Goldsky', 'Ponder', 'Subsquid'];
 const rows = [
-  { f: 'Runs on your hardware',        c: [ ['yes'], ['part','Heavy self-host'], ['no','Managed only'], ['yes'] ] },
-  { f: 'One-binary install',           c: [ ['yes'], ['no','node + PG + IPFS'], ['no'], ['no','Node.js runtime'] ] },
-  { f: 'No mandatory third-party API', c: [ ['yes'], ['part','If self-hosted'], ['no','Required'], ['part','Needs an RPC'] ] },
-  { f: 'Deterministic / re-executable',c: [ ['yes'], ['part','PoI'], ['no'], ['no','Imperative'] ] },
-  { f: 'Declarative entities (IVM)',   c: [ ['yes'], ['no','AssemblyScript'], ['no'], ['no','TypeScript'] ] },
-  { f: 'Built-in MCP server',          c: [ ['yes'], ['no'], ['no'], ['no'] ] },
-  { f: 'Licence',                      c: [ ['t','AGPL-3.0'], ['t','Open source'], ['t','Closed'], ['t','MIT'] ] },
-  { f: 'Price',                        c: [ ['t','Free'], ['t','Per-query fees'], ['t','Usage-based'], ['t','Free'] ] },
+  { f: 'Runs on your hardware',        c: [ ['yes'], ['part','Heavy self-host'], ['no','Managed only'], ['yes'], ['yes'] ] },
+  { f: 'One-binary install',           c: [ ['yes'], ['no','node + PG + IPFS'], ['no'], ['no','Node.js runtime'], ['no','Archive + PG'] ] },
+  { f: 'No mandatory third-party API', c: [ ['yes'], ['part','If self-hosted'], ['no','Required'], ['part','Needs an RPC'], ['part','Archive network'] ] },
+  { f: 'Deterministic / re-executable',c: [ ['yes'], ['part','PoI'], ['no'], ['no','Imperative'], ['no','Imperative'] ] },
+  { f: 'Declarative entities (IVM)',   c: [ ['yes'], ['no','AssemblyScript'], ['no'], ['no','TypeScript'], ['no','TypeScript'] ] },
+  { f: 'Built-in MCP server',          c: [ ['yes'], ['no'], ['no'], ['no'], ['no'] ] },
+  { f: 'Licence',                      c: [ ['t','AGPL-3.0'], ['t','Open source'], ['t','Closed'], ['t','MIT'], ['t','Apache-2.0'] ] },
+  { f: 'Price',                        c: [ ['t','Free'], ['t','Per-query fees'], ['t','Usage-based'], ['t','Free'], ['t','Free'] ] },
 ];
 ---
 <Layout path="/">
@@ -187,8 +187,8 @@ const rows = [
         </table>
       </div>
       <p class="compare-foot">
-        Ponder is excellent. If you want TypeScript, use it. The Graph and Goldsky are good
-        tools too; this table states facts, not a verdict.
+        Ponder is excellent. If you want TypeScript, use it. The Graph, Goldsky, and Subsquid are
+        good tools too; this table states facts, not a verdict.
       </p>
     </div>
   </section>
@@ -306,7 +306,7 @@ const rows = [
   /* COMPARE */
   .compare h2 { margin-bottom: 2rem; }
   .table-scroll { overflow-x: auto; border: 1px solid var(--border); border-radius: var(--radius); }
-  .ctable { width: 100%; border-collapse: collapse; min-width: 40rem; font-size: 0.9rem; }
+  .ctable { width: 100%; border-collapse: collapse; min-width: 48rem; font-size: 0.9rem; }
   .ctable th, .ctable td { text-align: left; padding: 0.85rem 1rem; border-bottom: 1px solid var(--border); vertical-align: top; }
   .ctable thead th { font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; letter-spacing: 0.02em; color: var(--text-muted); font-weight: 500; }
   .ctable tbody tr:last-child th, .ctable tbody tr:last-child td { border-bottom: 0; }

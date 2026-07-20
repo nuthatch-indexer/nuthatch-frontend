@@ -16,9 +16,9 @@ Tagline: "Be your own indexer."
 - `nuthatch init 0xAddr [0xAddr…] [--chain <mainnet|arbitrum-one|base>]` resolves each contract's
   ABI (Sourcify, then an Etherscan-class API; EIP-1967/legacy-OZ proxies resolved) and scaffolds a
   multi-contract nest: `nuthatch.toml`, `abis/`, a `schema.json`, a `semantic.toml` (per-nest
-  meaning, seeded from the ABI), an `llms.txt`, and a Claude Code skill. Omit `--chain` and nuthatch
-  probes each supported chain for the contract's bytecode. It does not yet generate views, handlers,
-  or tests from the ABI.
+  meaning, seeded from the ABI), a commented `views/` starter, an `llms.txt`, and a Claude Code
+  skill. Omit `--chain` and nuthatch probes each supported chain for the contract's bytecode. It
+  does not yet auto-generate the view logic, handlers, or tests from the ABI.
 - `nuthatch sql "…"` runs one-shot SQL from the terminal (aligned table, `--json` to pipe), or opens
   an interactive REPL (`.tables`/`.schema`, history) when given no query. `nuthatch add 0xAddr` grows
   a nest with another contract without re-init. `nuthatch mcp --print-config` prints a copy-paste MCP
@@ -31,18 +31,22 @@ Tagline: "Be your own indexer."
   every declared event of every contract (topic0 registry → one table per `{alias}__{event}`),
   stores rows in an embedded hot store (redb), seals finalized ranges to content-addressed Parquet
   (hot store pruned), and serves a local HTTP API on 127.0.0.1:8288: `/tables`, `/table/{name}`
-  (hot+cold merged), `/sql` (read-only DuckDB over sealed data), `/entity/{id}`, `/balances`,
-  `/balance/{addr}`, `/exposure/{addr}`, `/flags`, `/metrics` (Prometheus), and a localhost-gated
-  admin UI at `/_admin/`. Every row carries provenance columns (`block_hash`, `_seq`,
+  (hot+cold merged), `/schema` (the enriched data model), `/sql` (read-only DuckDB, sealed history
+  UNION the live hot tip), `/explain` (validate SQL without running it), `/entity/{id}`, `/balances`,
+  `/balance/{addr}`, `/exposure/{addr}`, `/flags`, `/ready` (readiness: 200 fresh / 503 stalled),
+  `/metrics` (Prometheus), and a localhost-gated admin UI at `/_admin/`. Every row carries provenance columns (`block_hash`, `_seq`,
   `block_timestamp`) and `*_dec`/`*_overflow` siblings for big integers.
 - A nest is a git repo: `nuthatch init --from <git-url | ./dir>` runs a published nest (vendored
-  ABIs + deployment blocks, schema-version guarded); `views/*.sql` add derived entities;
-  `nuthatch check` runs `checks/*.sql` against recorded fixtures (hermetic parity/invariant framework).
+  ABIs + deployment blocks, schema-version guarded); authored `views/*.sql` (RFC-0018) are a
+  validated, drift-gated layer - each binds against the schema at load, so a moved column is a loud
+  `nuthatch check` failure, described in `semantic.toml` and surfaced in `/schema`; `nuthatch check`
+  also runs `checks/*.sql` against recorded fixtures (hermetic parity/invariant framework).
 - Balances are an incrementally-maintained view (DBSP): i128 base units serialised as decimal
   strings, a reorg is a retraction, and the view replays from stored facts on restart.
 - `dev --seal-direct` runs a ~20× faster phased cold-start backfill (measured ~289 → ~5,837 ev/s on
-  public RPC, byte-identical segments). Operator surface: `/metrics`, `/sql` guards (timeout, row
-  cap, concurrency), graceful shutdown on SIGTERM.
+  public RPC, byte-identical segments). Operator surface: `/metrics`, `/ready`, `/sql` guards
+  (timeout, row cap, concurrency), health-aware RPC failover (a failing endpoint is benched on a
+  cooldown), startup segment recovery (hash-verify + quarantine), graceful shutdown on SIGTERM.
 - `nuthatch transform <component.wasm>` runs a pure, zero-capability WASM transform over an Arrow
   batch. `nuthatch mcp` serves the Model Context Protocol over stdio (12 tools: status, schema,
   tables, table, sql, explain, entity, balance, top_balances, flags, exposure, screen_status; plus 3
@@ -58,8 +62,10 @@ Tagline: "Be your own indexer."
 - Admin UI and webhooks (RFC-0010): an embedded read-only admin UI at `/_admin/` (no framework/CDN,
   localhost-gated), plus user `[[webhooks]]` that POST sealed rows matching a `where` clause,
   HMAC-signed with `X-Nuthatch-Signature`.
-- Nest packaging (RFC-0012, partial): `nuthatch nest pack`/`mount` build and verify a
-  content-addressed nest blob, reproducing the decode registry from the installed inputs.
+- Nest packaging and the roost (RFC-0012, complete): `nuthatch nest pack`/`mount` build and verify a
+  content-addressed nest blob, reproducing the decode registry from the installed inputs; `nuthatch
+  roost` runs several nests on one chain in a single process under one shared cursor, hot store, and
+  finality view, with strict per-nest isolation and a per-runtime RSS budget. Verified live on Arbitrum.
 - Chains: Ethereum mainnet, Arbitrum One (42161), and Base (8453), with finality as a per-chain
   policy. Measured footprint: ~37 MB single contract, ~58 MB three-contract 23-table nest (2.8% of
   the 2 GB budget; CI fails above 256 MB).
@@ -69,8 +75,8 @@ Tagline: "Be your own indexer."
 - reth ExEx tip-ingestion against your own node (designed and stubbed; toolchain + dependency
   blockers cleared, needs a synced node; RPC is the working path), and firehose-class extraction of
   traces and state diffs on top of it (RFC-0014, deferred).
-- Scaled mode (Postgres hot store + DataFusion federation, RFC-0013 direction record); the
-  multi-nest roost runtime (two nests, one cursor - RFC-0012, packaging shipped, roost not yet).
+- Scaled mode (Postgres hot store + DataFusion federation, RFC-0013 direction record; the
+  SQL-over-the-tip half of RFC-0013 already ships - `/sql` unions hot and cold).
 - Generated schema, views, and tests from an ABI or a subgraph manifest; a GraphQL compatibility
   layer; streaming subscribe (SSE); local AI models (Ollama / bring-your-own-key); effectful HTTP
   egress for transform worlds (`kv` grant ships today); wildcard indexing.
@@ -137,8 +143,8 @@ discovery (RFC-0009, it indexes Uniswap), the compliance pack (RFC-0008: screeni
 signed audit), a local admin UI + webhooks (RFC-0010), content-addressed nest packaging and the
 multi-nest roost (RFC-0012), the delightful core (RFC-0015: sql/REPL, magical init, add, prod
 recipes), and the governed semantic layer + agent-grade MCP (RFC-0016/0017). v0.5.0 is the current
-release, with prebuilt binaries. In progress: the graph-network nest and
-Lodestar migration (RFC-0011, pilot live in production - two panels; graph-network-nest published),
+release, with prebuilt binaries. In progress: the
+Lodestar migration (RFC-0011, pilot live in production - two panels; horizon-nest carries the surface),
 and reth ExEx wiring (RFC-0003, needs a synced node). Planned: the remaining release engineering
 (RFC-0005: signing, Homebrew, OCI), scaled mode (RFC-0013: Postgres + DataFusion), firehose-class
 extraction (RFC-0014), a GraphQL layer, IVM generalisation, and wildcard indexing. Not planned: a token or decentralized-network

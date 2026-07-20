@@ -30,22 +30,29 @@ obstacle has been the operational weight of the tooling, which is an engineering
 
 1. `nuthatch init 0xAddr [0xAddr…] --chain <mainnet|arbitrum-one|base>` - resolves each contract's
    ABI (Sourcify first, then an Etherscan-class API, cached; EIP-1967/legacy-OZ proxies resolved)
-   and scaffolds a multi-contract nest: `nuthatch.toml`, `abis/`, a `schema.json`, an `llms.txt`,
-   and a Claude Code skill. It does not yet generate views, handlers, or tests from the ABI.
+   and scaffolds a multi-contract nest: `nuthatch.toml`, `abis/`, a `schema.json`, a `semantic.toml`
+   (per-nest meaning, seeded from the ABI), a commented `views/` starter, an `llms.txt`, and a Claude
+   Code skill. Omit `--chain` and it probes each supported chain for the contract's bytecode. It does
+   not yet auto-generate the view logic, handlers, or tests from the ABI.
 2. `nuthatch dev` - polls logs over RPC (round-robin failover, adaptive `getLogs` chunking), decodes
    every declared event of every contract (topic0 registry → one table per `{alias}__{event}`),
    stores rows in an embedded hot store (redb), seals finalized ranges to content-addressed Parquet
    (pruning the hot store), and serves a local HTTP API on 127.0.0.1:8288: `/tables`,
-   `/table/{name}` (hot+cold merged), `/sql` (read-only DuckDB over sealed data), `/entity/{id}`,
-   `/balances`, `/balance/{addr}`, `/exposure/{addr}`, `/flags`, `/metrics` (Prometheus), and a
-   localhost-gated admin UI at `/_admin/`. Every row carries provenance columns (`block_hash`,
+   `/table/{name}` (hot+cold merged), `/schema` (the enriched data model), `/sql` (read-only DuckDB,
+   sealed history UNION the live hot tip), `/explain` (validate SQL without running it), `/entity/{id}`,
+   `/balances`, `/balance/{addr}`, `/exposure/{addr}`, `/flags`, `/ready` (readiness: 200 fresh / 503
+   stalled), `/metrics` (Prometheus), and a localhost-gated admin UI at `/_admin/`. Every row carries provenance columns (`block_hash`,
    `_seq`, `block_timestamp`) and `*_dec`/`*_overflow` siblings. The balance view is DBSP-maintained
    in i128 (decimal-string serialised); a reorg is a retraction; the view replays from stored facts
    on restart. `dev --seal-direct` runs a ~20× faster phased cold-start backfill.
 3. Nests: `nuthatch init --from <git-url | ./dir>` runs a published nest (vendored ABIs + deployment
-   blocks, schema-version guarded); `views/*.sql` add derived entities; `nuthatch check` runs
-   `checks/*.sql` against recorded fixtures (hermetic parity/invariant framework). `nuthatch nest
-   pack`/`mount` build and verify a content-addressed nest blob (RFC-0012).
+   blocks, schema-version guarded); authored `views/*.sql` (RFC-0018) are a validated, drift-gated
+   layer (each binds against the schema at load, so a moved column is a loud `nuthatch check` failure,
+   described in `semantic.toml`, surfaced in `/schema`); `nuthatch check` also runs `checks/*.sql`
+   against recorded fixtures. `nuthatch nest pack`/`mount` build and verify a content-addressed nest
+   blob, and `nuthatch roost` runs several nests on one chain in a single process under one shared
+   cursor, hot store, and finality view, with per-nest isolation and a per-runtime RSS budget
+   (RFC-0012, verified live on Arbitrum).
 4. `nuthatch transform <component.wasm>` - runs a pure, zero-capability WASM transform over an Arrow
    batch; effectful stages take per-component capability grants (`kv` today). `nuthatch mcp` -
    serves the Model Context Protocol over stdio (12 tools: status, schema, tables, table, sql,
@@ -76,8 +83,8 @@ byte-identical segments). v0.5.0 is the current release, with prebuilt binaries 
 
 reth ExEx tip-ingestion (own node; toolchain + dependency blockers cleared, needs a synced node)
 and firehose-class extraction of traces and state diffs on top of it (RFC-0014, deferred); scaled
-mode (Postgres + DataFusion federation, RFC-0013 direction record); the multi-nest roost runtime
-(two nests, one cursor - RFC-0012, packaging shipped, roost not yet); generated schema, views, and
+mode (Postgres + DataFusion federation, RFC-0013 direction record - the SQL-over-the-tip half already
+ships, `/sql` unions hot and cold); generated schema, views, and
 tests from an ABI; subgraph migration (`init --from-subgraph`); a GraphQL compatibility layer;
 streaming subscribe (SSE); local AI models (Ollama / bring-your-own-key); effectful HTTP egress for
 transform worlds (`kv` grant ships today); wildcard indexing. Chains
@@ -136,6 +143,8 @@ segments - no trusted execution environments and no zero-knowledge proofs.
 - Ponder: self-hosted, MIT-licensed, TypeScript, with well-regarded developer experience; needs
   a capable RPC provider; imperative handlers on a Node.js runtime. Ponder is a good tool; if
   you want TypeScript, use it.
+- Subsquid: self-hosted, Apache-2.0, TypeScript; imperative handlers reading from an archive
+  (its network or your own) plus Postgres; GraphQL out. A good tool too.
 - Nuthatch: runs on your hardware, one-binary install, no mandatory third-party data API,
   deterministic and re-executable, declarative entities via IVM, a built-in MCP server, AGPL-3.0,
   and free.
@@ -178,9 +187,10 @@ promised - order is.
 - Shipped: the embedded single-binary pipeline end to end (multi-contract ABI-driven decode of
   every declared event, provenance/ergonomics columns - `block_hash`, `_seq`, `block_timestamp`,
   `*_dec`/`*_overflow` - reorg-safe hot store, finality-sealed content-addressed Parquet, DuckDB
-  SQL over `/tables` + `/table/{name}`, an i128 DBSP balance view with restart-replay, HTTP + an
-  11-tool offline MCP server); nests (`init --from`, vendored ABIs + deploy blocks, schema
-  versioning, `views/*.sql` with empty-typed-view handling, the `nuthatch check` parity framework);
+  SQL over `/tables` + `/table/{name}` and `/sql` (hot tip UNION sealed history), an i128 DBSP balance
+  view with restart-replay, HTTP + a 12-tool/3-resource/3-prompt offline MCP server); nests
+  (`init --from`, vendored ABIs + deploy blocks, schema versioning, authored drift-gated `views/*.sql`
+  (RFC-0018), the `nuthatch check` parity framework);
   three chains (Ethereum mainnet + Arbitrum One + Base) with finality as policy; the complete
   backfill work (RFC-0004: bench harness, seal-direct, pipelined fetching, adaptive chunker,
   `dev --seal-direct`) measured at ~289 → 2,521 → 5,837 ev/s on public RPC (~20× over baseline,
@@ -195,9 +205,8 @@ promised - order is.
   multi-nest roost (RFC-0012); v0.5.0 the current release with prebuilt binaries;
   a CI RAM-budget gate with a measured footprint (~37 MB single contract, ~58 MB
   three-contract 23-table nest, 2.8% of 2 GB).
-- In progress: the graph-network nest and Lodestar migration (RFC-0011 - pilot live in production,
-  two panels serving from one nuthatch binary; remaining panels and the published nest outstanding);
-  the multi-nest roost runtime (RFC-0012 - two nests under one cursor, packaging done, roost next);
+- In progress: the Lodestar migration (RFC-0011 - pilot live in production,
+  two panels serving from one nuthatch binary via horizon-nest; remaining panels outstanding);
   reth ExEx wiring (RFC-0003 - Source trait, library split, and bridge in and tested; needs a synced
   node).
 - Planned: the remaining release engineering (RFC-0005 - signed artifacts, a Homebrew tap, an OCI
