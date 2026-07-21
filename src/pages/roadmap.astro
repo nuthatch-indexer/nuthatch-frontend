@@ -165,7 +165,7 @@ const progressLog = `${REPO}#progress-log`;
 
       <p class="grp">Safe upgrades - no resync tax (<a href={rfc('0020')} rel="noopener">RFC-0020</a>, in progress)</p>
       <ul class="rl">
-        <li><code>nuthatch nest diff &lt;old&gt; &lt;new&gt;</code> classifies a nest update over its schema: <em>compatible</em> (additive only - a new table or column, meant to hot-swap behind the same endpoint) or <em>breaking</em> (a consumer-observable change - removed, renamed, or retyped - which takes a new versioned endpoint, run alongside the old so downstream migrate on their clock). Updating a nest stops being a subgraph-style genesis resync. The classifier is shipped; the hot-swap and endpoint machinery - and reusing sealed content-addressed segments instead of re-indexing - follow.</li>
+        <li><code>nuthatch nest diff &lt;old&gt; &lt;new&gt;</code> classifies a nest update: <em>compatible</em> (additive only - a new table or column) or <em>breaking</em> (a consumer-observable change - removed, renamed, or retyped). <code>nuthatch nest upgrade --to &lt;new&gt;</code> then <strong>hot-swaps a compatible update with zero downtime</strong> - it serves the old version, indexes the new one concurrently, and atomically flips the endpoint the moment the new one catches up, so the served address never changes and updating a nest stops being a subgraph-style genesis resync. A breaking update is refused: it needs a new versioned endpoint, run alongside the old so downstream migrate on their clock (the deprecation-window path, and reusing sealed segments instead of re-indexing, are next).</li>
       </ul>
 
       <p class="grp">Release and footprint</p>
