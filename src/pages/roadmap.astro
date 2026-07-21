@@ -31,6 +31,7 @@ const RFCS = {
   '0017': '0017-builder-skill.md',
   '0018': '0018-what-a-nest-is-authored-logic-and-composable-nests.md',
   '0019': '0019-nest-registry-and-distribution.md',
+  '0020': '0020-nest-lifecycle-and-the-n-1-upgrade.md',
 };
 const rfc = (n) => `${REPO}/blob/main/docs/rfcs/${RFCS[n]}`;
 const rfcsDir = `${REPO}/tree/main/docs/rfcs`;
@@ -160,6 +161,11 @@ const progressLog = `${REPO}#progress-log`;
       <ul class="rl">
         <li><code>nest publish &lt;bundle&gt; --registry &lt;path|s3://…&gt; --as name@version</code> writes a bundle to a content-addressed store; <code>nest load name@version --registry …</code> resolves, fetches, and installs it - the pulled blob hash-verified by the same install path, so a registry pull is as safe as a hash-pinned file load. A filesystem path <em>is</em> a registry; an S3-compatible bucket (MinIO/S3/R2) is the fleet path, behind <code>--features object-store</code>.</li>
         <li><strong>Private nests</strong> live behind your bucket's own auth (<code>AWS_*</code> env, including <code>AWS_ENDPOINT</code>); a missing or rejected credential fails with a clear "this nest is private", never a bare "not found". Self-hosted-first: the registry is decoupled and never mandatory - a self-built bundle and <code>load &lt;file|dir&gt;</code> touch no registry at all.</li>
+      </ul>
+
+      <p class="grp">Safe upgrades - no resync tax (<a href={rfc('0020')} rel="noopener">RFC-0020</a>, in progress)</p>
+      <ul class="rl">
+        <li><code>nuthatch nest diff &lt;old&gt; &lt;new&gt;</code> classifies a nest update over its schema: <em>compatible</em> (additive only - a new table or column, meant to hot-swap behind the same endpoint) or <em>breaking</em> (a consumer-observable change - removed, renamed, or retyped - which takes a new versioned endpoint, run alongside the old so downstream migrate on their clock). Updating a nest stops being a subgraph-style genesis resync. The classifier is shipped; the hot-swap and endpoint machinery - and reusing sealed content-addressed segments instead of re-indexing - follow.</li>
       </ul>
 
       <p class="grp">Release and footprint</p>
