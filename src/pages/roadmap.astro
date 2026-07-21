@@ -3,7 +3,8 @@
      Last regenerated against the progress log through the v0.5.0 release: RFC-0015
      (the delightful core - sql/REPL, magical init, add, prod recipes), RFC-0016 (governed
      semantic layer + agent-grade MCP) and RFC-0017 (builder skill) all shipped;
-     RFC-0012 roost shipped; v0.5.0 is the current release.
+     RFC-0012 roost shipped; v0.5.0 is the current release. Post-0.5.0: RFC-0019 nest
+     registry (publish/load name@version, filesystem + S3, private nests) shipped.
      Keep it product-neutral: describe the binary, not any deployment or commercial
      arrangement. -->
 ---
@@ -29,6 +30,7 @@ const RFCS = {
   '0016': '0016-governed-semantic-layer-and-agent-grade-mcp.md',
   '0017': '0017-builder-skill.md',
   '0018': '0018-what-a-nest-is-authored-logic-and-composable-nests.md',
+  '0019': '0019-nest-registry-and-distribution.md',
 };
 const rfc = (n) => `${REPO}/blob/main/docs/rfcs/${RFCS[n]}`;
 const rfcsDir = `${REPO}/tree/main/docs/rfcs`;
@@ -91,7 +93,7 @@ const progressLog = `${REPO}#progress-log`;
 
       <p class="grp">Nests</p>
       <ul class="rl">
-        <li><code>init --from &lt;git-url | ./dir&gt;</code> - a nest is a git repo, so there is no registry; the vendored ABIs and deployment blocks travel with it.</li>
+        <li><code>init --from &lt;git-url | ./dir&gt;</code> - a nest is a git repo, so it needs no registry to share; the vendored ABIs and deployment blocks travel with it. A content-addressed <a href={rfc('0019')} rel="noopener">registry</a> is the optional package path when you want <code>name@version</code> and private nests.</li>
         <li>A schema-version guard rejects a nest declaring a newer format, which is what makes consuming a third party's nest safe.</li>
         <li>Authored <code>views/*.sql</code> (<a href={rfc('0018')} rel="noopener">RFC-0018</a>) are a validated, drift-gated layer: each view binds against the schema at load - so a column that moves out from under it is a loud <code>nuthatch check</code> failure, not a silent wrong number - and its meaning is described in <code>semantic.toml</code> and surfaced through <code>/schema</code>.</li>
         <li><code>nuthatch check</code> runs a nest's <code>checks/*.sql</code> against recorded fixtures - the generic parity and invariant framework, hermetic in CI.</li>
@@ -152,6 +154,12 @@ const progressLog = `${REPO}#progress-log`;
       <ul class="rl">
         <li><code>nuthatch nest bundle</code> packs a nest's authored inputs into a single portable, content-addressed <code>.bundle</code> file whose hash is a Merkle root over a canonical manifest; <code>nest load</code> verifies and installs one - from a local file or an <code>http(s)</code> URL - regenerating the decode registry from the installed inputs and asserting it matches the author's pinned hash. Determinism carried across the wire, not just the disk.</li>
         <li><code>nuthatch roost</code> - one runtime hosts several nests on the same chain under a single cursor, one hot store, and one finality view, with strict per-nest isolation and a per-runtime RSS budget: a mount whose projection exceeds the budget is refused before it starts. Verified live on Arbitrum.</li>
+      </ul>
+
+      <p class="grp">Nest registry (<a href={rfc('0019')} rel="noopener">RFC-0019</a>)</p>
+      <ul class="rl">
+        <li><code>nest publish &lt;bundle&gt; --registry &lt;path|s3://…&gt; --as name@version</code> writes a bundle to a content-addressed store; <code>nest load name@version --registry …</code> resolves, fetches, and installs it - the pulled blob hash-verified by the same install path, so a registry pull is as safe as a hash-pinned file load. A filesystem path <em>is</em> a registry; an S3-compatible bucket (MinIO/S3/R2) is the fleet path, behind <code>--features object-store</code>.</li>
+        <li><strong>Private nests</strong> live behind your bucket's own auth (<code>AWS_*</code> env, including <code>AWS_ENDPOINT</code>); a missing or rejected credential fails with a clear "this nest is private", never a bare "not found". Self-hosted-first: the registry is decoupled and never mandatory - a self-built bundle and <code>load &lt;file|dir&gt;</code> touch no registry at all.</li>
       </ul>
 
       <p class="grp">Release and footprint</p>
