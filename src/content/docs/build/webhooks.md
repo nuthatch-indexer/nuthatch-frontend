@@ -12,14 +12,19 @@ indexer. Unconfigured, it **warns and skips** rather than failing.
 
 ```toml
 [[webhooks]]
-name = "ops"
+name = "large-transfers"
+table = "usdc__transfer"          # rows from this table
+where = "value_dec > 1000000"      # optional SQL predicate — note the key is `where`, not `when`
 url = "https://your-service/hooks/usdc"
-table = "usdc__transfer"     # rows from this table
-when = "value_dec > 0"        # optional SQL predicate — only matching rows
+# batch_max = 100                  # optional rows-per-POST cap
+# finality = "sealed"              # "sealed" (default, never retracts) | "tip" (fast, may retract)
+# since = "registration"           # "registration" (default) | "genesis" | a block number
+# secret = "…"                     # optional HMAC-SHA256 secret → X-Nuthatch-Signature header
 ```
 
-Repeat `[[webhooks]]` for each destination. A webhook can carry a `when` predicate so you deliver only the
-rows you care about, and it's referenced by `name` from [compliance alerts](/docs/build/compliance/).
+Repeat `[[webhooks]]` for each destination. A webhook can carry a `where` predicate so you deliver only
+the rows you care about. Setting a `secret` signs each POST with an `X-Nuthatch-Signature: sha256=<hex>`
+header, so your receiver can verify it came from this nest.
 
 ## Delivered past finality
 

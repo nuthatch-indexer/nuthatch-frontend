@@ -1,56 +1,72 @@
 ---
 title: Compliance pack
-description: Optional screening, flags, and alerts — an add-on stage over decoded rows, warn-and-skip.
+description: Optional screening, flags, and alerts — a derive-only stage over decoded transfers.
 order: 7
 ---
 
-Some nests need more than raw rows: screen addresses against a list, flag rows that match a rule, raise
-an alert when something crosses a threshold. The **compliance pack** is an optional stage over your
-decoded tables — off by default, and, like every optional integration, it **warns and skips** when it
-isn't configured rather than failing the nest.
+Some nests need more than raw rows: screen addresses against a sanctions list, flag transfers that cross
+a threshold, raise an alert when something fires. The **compliance pack** is an optional stage over your
+decoded transfers — off by default, deterministic, and, like every optional integration, it costs
+nothing when it isn't configured.
 
-> This is the liminal graceful-degradation pattern: an optional sink that isn't wired up logs a warning
-> and carries on. A nest never fails because a stage you didn't ask for wasn't set up.
+> Screening lists are **local, content-addressed snapshots** you fetch and pin — nuthatch never reaches
+> for a gated screening service mid-decode. That would break the
+> [no-phone-home rule](/docs/concepts/determinism/).
 
 ## The shape
 
 ```toml
 [screening]
-lists = ["lists/sanctioned.txt"]   # newline-delimited addresses, local files
-columns = ["from", "to"]           # which address columns to screen
+lists = ["<list-hash>"]              # content-addressed snapshots from `nuthatch lists fetch`
 
-[[flags]]
-name = "large_transfer"
-table = "usdc__transfer"
-when = "value_dec > 1000000000000"  # a SQL predicate over the row
+[flags]                              # singular table — two built-in rules
+threshold = "1000000000000"          # flag any single transfer ≥ this (base units, decimal string)
+velocity_amount = "5000000000000"    # flag an address whose windowed outbound volume ≥ this
+velocity_window = 7200               # window in BLOCKS (≈24h at 12s blocks); default 7200
 
 [[alerts]]
-on = "large_transfer"               # a flag name
-webhook = "ops"                     # a named webhook (see Webhooks)
+kinds = ["threshold_flag", "sanction_hit"]   # which annotation kinds to deliver
+url = "https://your-service/alerts"
 ```
 
-- **`[screening]`** — match address columns against local lists. Screened rows carry a derived flag; the
-  lists are ordinary local files (no third-party data service, no phone-home).
-- **`[[flags]]`** — a named SQL predicate over a table. Matching rows are tagged, queryable like any
-  column, and described in the [semantic layer](/docs/build/semantic/).
-- **`[[alerts]]`** — when a flag fires, notify. Alerts ride the [webhook](/docs/build/webhooks/) delivery
-  path, so they inherit its at-least-once, past-finality delivery.
+- **`[screening]`** — screen each transfer's `from`/`to` against pinned list snapshots. A match becomes
+  an append-only **`sanction_hit`** annotation, stamped with the list-snapshot version it matched.
+  Fetch a list first with `nuthatch lists fetch` (built-in `ofac-sdn`, `eu-consolidated`, or your own
+  via `--url`/`--file`).
+- **`[flags]`** — two built-in rules, not arbitrary SQL. `threshold` flags any single transfer at or
+  above an amount; `velocity` flags an address whose outbound volume over `velocity_window` **blocks**
+  reaches `velocity_amount`. Matches become **`threshold_flag`** annotations. Amounts are base units as
+  decimal strings; the window is a **block count**, not wall-clock — an honest approximation, since the
+  chain has no clock.
+- **`[[alerts]]`** — deliver annotations whose `kind` is in `kinds` to a `url`. The only valid kinds are
+  `threshold_flag` and `sanction_hit` — they match the emitted annotations exactly.
 
 ## Determinism holds
 
-Screening and flags are deterministic derivations over decoded rows — a SQL predicate and a local-list
-match, nothing that phones out mid-decode. They're re-executable: the same blocks always produce the same
-flags. Effectful notification (the alert POST) happens **after** sealing, never in the decode path — the
-same rule as webhooks and enrichers (see [Determinism](/docs/concepts/determinism/)).
+Screening and flags are deterministic derivations over decoded transfers — a list-snapshot match and two
+numeric rules, nothing that phones out mid-decode. They're re-executable: the same blocks and the same
+list snapshot always produce the same annotations, which is what makes the signed audit pack
+(`nuthatch audit replay`) able to re-prove them from scratch. Effectful notification (the alert POST)
+happens **after** sealing, never in the decode path — the same rule as webhooks and enrichers (see
+[Determinism](/docs/concepts/determinism/)).
 
-## Local-first, no data dependency
+## Delivery is durable
 
-Lists are local files you control. Nuthatch never reaches for a gated screening service — that would
-break the [no-phone-home non-negotiable](/docs/concepts/determinism/). Bring your own list; update it
-like any file.
+Alerts ride the same host-side [webhook](/docs/build/webhooks/) delivery engine: at-least-once, via a
+durable outbox, with retries and backoff. A stalled sink never blocks indexing — it only backs up its own
+queue (`nuthatch_alert_outbox_depth` in [/metrics](/docs/operate/metrics/)).
+
+## Query the annotations
+
+Flags and hits are ordinary rows. Query the live counts over the HTTP API — `GET /flags?kind=threshold`
+or `?kind=velocity` — or the full sealed history in SQL:
+
+```sql
+SELECT * FROM sanction_hit ORDER BY block_number DESC LIMIT 20;
+```
 
 ## Next
 
-- [Webhooks](/docs/build/webhooks/) — where alerts are delivered
+- [Webhooks](/docs/build/webhooks/) — the delivery engine alerts share
 - [The semantic layer](/docs/build/semantic/) — describe what a flag means
 - [nuthatch.toml](/docs/build/config/) — where the stage is configured

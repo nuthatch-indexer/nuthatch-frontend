@@ -17,19 +17,19 @@ parent announces a new child, and which field holds its address):
 [[templates]]
 name = "pool"
 abi = "abis/uniswap-v3-pool.json"
-events = ["Swap", "Mint", "Burn"]
+# filter = "topic0"        # optional backfill-strategy override for templates with very many children
 
 [[factories]]
-# When the factory contract emits PoolCreated, the `pool` field is a new child to index as a `pool`.
-parent = "factory"
+# When `factory` emits PoolCreated, the child in the `pool` param is indexed as a `pool`.
+watch = "factory"          # the ALIAS of a [[contracts]] entry (or another template, for nesting)
 event = "PoolCreated"
-address_field = "pool"
-template = "pool"
-start = "creation"        # index the child from its creation block
+child_param = "pool"       # the event param holding the new child's address
+template = "pool"          # which [[templates]] to apply to the child
+# start = 12369621         # optional: only honour discoveries at or after this block
 ```
 
-When the parent emits `PoolCreated`, nuthatch registers the address in that event's `pool` field as a new
-`pool` child and starts decoding its `Swap`/`Mint`/`Burn` events from the creation block onward.
+When the parent emits `PoolCreated`, nuthatch registers the address in that event's `pool` param as a new
+`pool` child and decodes its events — every event the template's ABI defines — from discovery onward.
 
 ## One table, many children
 
