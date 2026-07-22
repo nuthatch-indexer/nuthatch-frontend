@@ -4,7 +4,7 @@ description: "ETHGlobal Lisbon's $7,000 Best AI Tooling track names Nuthatch as 
 date: 2026-07-22
 ---
 
-*ETHGlobal Lisbon runs this weekend, July 24–26. The Graph is sponsoring $15,000 across three tracks, and their biggest one (Best AI Tooling for The Graph, $7,000) names Nuthatch twice: once as a suggested project, and once in the qualification requirements as an accepted data backend, alongside Subgraph Studio and The Graph Market. This post is what that means, what we make of it, and a field guide for anyone in Lisbon who decides to build on the bird.*
+*ETHGlobal Lisbon runs this weekend, July 24-26. The Graph is sponsoring $15,000 across three tracks, and their biggest one (Best AI Tooling for The Graph, $7,000) names Nuthatch twice: once as a suggested project, and once in the qualification requirements as an accepted data backend, alongside Subgraph Studio and The Graph Market. This post is what that means, what we make of it, and a field guide for anyone in Lisbon who decides to build on the bird.*
 
 ---
 
