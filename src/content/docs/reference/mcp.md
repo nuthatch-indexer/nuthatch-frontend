@@ -1,9 +1,53 @@
 ---
 title: "MCP server"
-description: "The built-in MCP surface — schema discovery, SQL, entity lookup, subscribe."
+description: "The built-in MCP surface — schema discovery, SQL, entity lookup, and provenance."
 order: 4
 ---
 
-_This page is a stub in the first documentation pass — the IA is in place; content is being filled in._
+The protocol reference for the built-in Model Context Protocol server. For the experience — wiring
+an agent up in one step and what it can do — see [AI-native → Agent-grade MCP](/docs/ai/mcp/).
 
-The built-in MCP surface — schema discovery, SQL, entity lookup, subscribe.
+## Transport
+
+`nuthatch mcp` serves MCP over **stdio**, bridging to a running `nuthatch dev` HTTP API (`--url`,
+default `http://127.0.0.1:8288`). The bridge is a thin client of the same guarded endpoints
+described in the [HTTP API reference](/docs/reference/http-api/) — an agent gets no capability a
+`curl` doesn't have. `nuthatch mcp --print-config` prints a copy-paste client config (a Claude Code
+`.mcp.json` plus the `claude mcp add` one-liner) and exits.
+
+## Tools
+
+- `status` — index status: contract, chain, rows indexed, holders, last and sealed block.
+- `schema` — the data model: how tables and views are named and queried. Read this first.
+- `tables` — every decoded table (`{alias}__{event}`) with columns, Solidity types, and topic0.
+- `table` (`name`, `limit` = 50) — recent rows of one table, hot ∪ sealed.
+- `sql` (`q`, `limit` = 200) — a read-only query over the live tip ∪ sealed history. SELECT/WITH
+  only; returns a compact table plus a provenance stamp. The bridge passes a small row cap so an
+  agent's context isn't flooded.
+- `explain` (`q`) — validate a query **without executing it**; returns `{valid: true}` or an error
+  with a fix hint. Cheaper than `sql` — check before you spend.
+- `entity` (`id`) — one row by id (`{block:012}-{logindex:06}`).
+- `balance` (`address`) / `top_balances` (`limit`) — derived balances from the IVM view (i128 base
+  units as decimal strings).
+- `flags` (`kind`) — threshold or velocity compliance flags (RFC-0008).
+- `exposure` (`address`) — counterparty exposure to the labeled set, per label.
+- `screen_status` (`address`) — sanctions-screening result: the `sanction_hit` annotations against
+  an address, with the list-snapshot version each was screened against.
+
+## Resources
+
+Three read-only resources an MCP client can attach as context:
+
+- `nuthatch://schema` (`text/plain`) — the composed schema document.
+- `nuthatch://tables` (`application/json`) — the table list.
+- `nuthatch://status` (`application/json`) — the index summary.
+
+## Prompts
+
+Three server-side prompts encode the known-good workflows:
+
+- `profile-contract` — an activity overview of the indexed contract(s), starting from `schema`.
+- `investigate-address` (`address`) — balances, exposure, flags, and screening for one address.
+- `verify-a-number` (`claim`) — re-derive a figure from scratch, with provenance.
+
+Everything is local: the server talks only to your own nest, and nothing phones home.
