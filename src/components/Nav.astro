@@ -7,6 +7,13 @@ import Mark from './Mark.astro';
       <Mark size={26} />
       <span>nuthatch</span>
     </a>
+
+    <!-- CSS-only menu toggle: a :has() checkbox hack, zero JavaScript (matches the theme toggle). -->
+    <input type="checkbox" id="nav-toggle" class="nav-input" aria-label="Toggle menu" />
+    <label for="nav-toggle" class="nav-burger" title="Menu">
+      <span></span><span></span><span></span>
+    </label>
+
     <nav class="nav-links" aria-label="Primary">
       <a href="/install">Install</a>
       <a href="/example">Example</a>
@@ -35,6 +42,7 @@ import Mark from './Mark.astro';
     border-bottom: 1px solid var(--border);
   }
   .nav-inner {
+    position: relative;
     display: flex; align-items: center; justify-content: space-between;
     height: 58px;
   }
@@ -46,6 +54,19 @@ import Mark from './Mark.astro';
   .nav-links { display: flex; align-items: center; gap: clamp(0.9rem, 2.4vw, 1.6rem); }
   .nav-links a { color: var(--text-muted); font-size: 0.92rem; }
   .nav-links a:hover { color: var(--text); text-decoration: none; }
+
+  /* Hamburger — hidden on desktop, a CSS-only toggle on mobile. */
+  .nav-input { position: absolute; opacity: 0; pointer-events: none; width: 0; height: 0; }
+  .nav-burger {
+    display: none; flex-direction: column; gap: 4px; cursor: pointer;
+    padding: 9px 8px; margin: -9px -8px; border-radius: 8px;
+  }
+  .nav-burger span {
+    display: block; width: 20px; height: 2px; border-radius: 2px;
+    background: var(--text-muted); transition: transform 0.2s var(--ease), opacity 0.2s var(--ease);
+  }
+  .nav-burger:hover span { background: var(--text); }
+  .nav-input:focus-visible + .nav-burger { outline: 2px solid var(--accent); outline-offset: 3px; }
 
   .theme-input { position: absolute; opacity: 0; pointer-events: none; width: 0; height: 0; }
   .theme-toggle {
@@ -68,7 +89,24 @@ import Mark from './Mark.astro';
   :root:has(#theme-toggle:checked) .theme-word--dark { display: none; }
   :root:has(#theme-toggle:checked) .theme-word--light { display: inline; }
 
-  @media (max-width: 30rem) {
-    .theme-word { display: none !important; }
+  /* Mobile: collapse the links into a dropdown behind the hamburger. */
+  @media (max-width: 48rem) {
+    .nav-burger { display: inline-flex; }
+    .nav-links {
+      display: none;
+      position: absolute; top: 58px; left: 0; right: 0;
+      flex-direction: column; align-items: stretch; gap: 0;
+      background: var(--bg-elev); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 0.4rem;
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
+    }
+    :root:has(#nav-toggle:checked) .nav-links { display: flex; }
+    .nav-links a { padding: 0.7rem 0.8rem; border-radius: var(--radius-sm); font-size: 0.98rem; }
+    .nav-links a:hover { background: var(--bg-inset); }
+    .theme-toggle { align-self: flex-start; margin: 0.4rem 0.8rem 0.2rem; }
+    /* Burger → X when open. */
+    :root:has(#nav-toggle:checked) .nav-burger span:nth-child(1) { transform: translateY(6px) rotate(45deg); }
+    :root:has(#nav-toggle:checked) .nav-burger span:nth-child(2) { opacity: 0; }
+    :root:has(#nav-toggle:checked) .nav-burger span:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
   }
 </style>
