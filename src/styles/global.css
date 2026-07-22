@@ -52,7 +52,9 @@
 }
 
 /* --- Light theme: the taste skill's exact warm-monochrome palette ------ */
-:root:has(#theme-toggle:checked) {
+/* Driven by [data-theme='light'] on <html> (set by a tiny inline script from localStorage), so the
+   choice persists across page loads — the one thing a pure-CSS toggle can't do. */
+:root[data-theme='light'] {
   --bg:          #fbfbfa;
   --bg-elev:     #ffffff;
   --bg-code:     #f7f6f3;
@@ -202,8 +204,8 @@ kbd {
   scrollbar-width: thin;
 }
 .astro-code, .astro-code span { color: var(--shiki-dark); }
-:root:has(#theme-toggle:checked) .astro-code,
-:root:has(#theme-toggle:checked) .astro-code span { color: var(--shiki-light); }
+:root[data-theme='light'] .astro-code,
+:root[data-theme='light'] .astro-code span { color: var(--shiki-light); }
 
 /* --- Quiet on-load entrance (CSS only, reduced-motion safe) ------------- */
 @keyframes rise {

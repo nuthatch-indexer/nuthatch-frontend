@@ -85,10 +85,10 @@ import Mark from './Mark.astro';
     background: var(--rust); box-shadow: inset 0 0 0 3px var(--bg);
     transition: background 0.2s var(--ease);
   }
-  :root:has(#theme-toggle:checked) .theme-dot { background: var(--warn); }
+  :root[data-theme='light'] .theme-dot { background: var(--warn); }
   .theme-word--light { display: none; }
-  :root:has(#theme-toggle:checked) .theme-word--dark { display: none; }
-  :root:has(#theme-toggle:checked) .theme-word--light { display: inline; }
+  :root[data-theme='light'] .theme-word--dark { display: none; }
+  :root[data-theme='light'] .theme-word--light { display: inline; }
 
   /* Mobile: collapse the links into a dropdown behind the hamburger. */
   @media (max-width: 48rem) {

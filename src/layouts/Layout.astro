@@ -51,6 +51,28 @@ const ogImage = new URL('/og.png', site).href;
     <link rel="preload" href="/fonts/jetbrains-mono.woff2" as="font" type="font/woff2" crossorigin />
 
     <link rel="alternate" type="text/plain" href="/llms.txt" title="llms.txt" />
+
+    <!-- Theme persistence: the one thing a pure-CSS toggle can't do across page loads. Reads a local
+         preference and applies it before paint (no flash). No network, no third party — just a
+         localStorage read/write. -->
+    <script is:inline>
+      (function () {
+        var root = document.documentElement;
+        try {
+          if (localStorage.getItem('theme') === 'light') root.setAttribute('data-theme', 'light');
+        } catch (e) {}
+        document.addEventListener('DOMContentLoaded', function () {
+          var cb = document.getElementById('theme-toggle');
+          if (!cb) return;
+          cb.checked = root.getAttribute('data-theme') === 'light';
+          cb.addEventListener('change', function () {
+            var light = cb.checked;
+            root.setAttribute('data-theme', light ? 'light' : 'dark');
+            try { localStorage.setItem('theme', light ? 'light' : 'dark'); } catch (e) {}
+          });
+        });
+      })();
+    </script>
   </head>
   <body>
     <a href="#main" class="skip">Skip to content</a>
