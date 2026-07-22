@@ -54,3 +54,45 @@ clients can automate the move.
 Upgrades compose with [the registry](/docs/operate/registry/): `nest load name@version` prepares
 the new version's directory, `nest diff` classifies it, `nest upgrade --to` performs it. Versions
 are content-addressed, so what you diffed is exactly what you flipped to.
+
+## Upgrading the nuthatch binary itself
+
+Everything above upgrades a *nest* - its schema, views, or decode. A separate axis is upgrading the
+*nuthatch runtime* serving your nests, from one release to the next. This is deliberately a plain
+binary swap, not a migration:
+
+- **On-disk state is forward-readable.** A newer binary reads an older release's hot store (redb) and
+  sealed Parquet segments as they are. No re-backfill, no conversion step.
+- **The `dev` flags and unit files are stable.** A release does not silently rename the flags your
+  service files depend on, so `systemctl` units carry over untouched.
+
+The procedure, canaried so nothing goes fully dark:
+
+```sh
+# 1. Fetch the release for your platform and verify it.
+curl -fsSLO https://github.com/nuthatch-indexer/nuthatch/releases/download/vX.Y.Z/nuthatch-x86_64-unknown-linux-gnu.tar.gz
+curl -fsSLO https://github.com/nuthatch-indexer/nuthatch/releases/download/vX.Y.Z/nuthatch-x86_64-unknown-linux-gnu.tar.gz.sha256
+sha256sum -c nuthatch-x86_64-unknown-linux-gnu.tar.gz.sha256
+tar xzf nuthatch-x86_64-unknown-linux-gnu.tar.gz
+
+# 2. Back up the old binary and each nest's data directory first.
+cp -a /usr/local/bin/nuthatch /usr/local/bin/nuthatch.bak
+tar czf nest-backup.tar.gz -C /opt/nuthatch my-nest
+
+# 3. Install over the running path. A running process keeps its old inode, so other nests
+#    keep serving the old version until you restart them - a free canary.
+install -m 0755 ./nuthatch /usr/local/bin/nuthatch
+
+# 4. Restart one nest, verify, then the rest.
+systemctl restart nuthatch@my-nest
+curl -s localhost:8095/health          # expect: ok
+```
+
+**Verify parity, do not assume it.** Note a few row counts before the swap and re-run them after; they
+should be identical. Query responses carry a `provenance` block whose `registry_hash` is a fingerprint
+of the decode and schema - an unchanged hash across the upgrade is proof the nest is producing the same
+answers. `as_of` running ahead of `sealed_through` confirms the nest is following the tip again.
+
+**If a release ever does change the on-disk format** (a rare, called-out event in the release notes),
+the fallback is cheap: stop the nest, delete only the derived data (`nuthatch.redb`, `segments/`,
+`.duckdb/`), keep the config (`nuthatch.toml`, `abis/`, `schema.json`), and let it re-backfill.
