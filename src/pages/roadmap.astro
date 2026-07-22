@@ -33,6 +33,7 @@ const RFCS = {
   '0019': '0019-nest-registry-and-distribution.md',
   '0020': '0020-nest-lifecycle-and-the-n-1-upgrade.md',
   '0021': '0021-the-multichain-roost.md',
+  '0023': '0023-contract-state-eth-call-derive-first.md',
 };
 const rfc = (n) => `${REPO}/blob/main/docs/rfcs/${RFCS[n]}`;
 const rfcsDir = `${REPO}/tree/main/docs/rfcs`;
@@ -172,6 +173,11 @@ const progressLog = `${REPO}#progress-log`;
       <p class="grp">Multichain roost (<a href={rfc('0021')} rel="noopener">RFC-0021</a>, in progress)</p>
       <ul class="rl">
         <li>A roost can host nests across <strong>more than one chain</strong> in a single runtime - <code>[[chains]]</code> in <code>roost.toml</code>, and one <strong>isolated cursor per chain</strong> (its own tip, finality, and reorg boundary): a Base nest and an Arbitrum nest served from one process. The footprint budget is <strong>per active-chain cursor</strong> (≤2 GB), and any cursor's failure fails the whole roost - one observable boundary, held per chain. A capability, not a mandate: one-chain-per-roost stays the simple default and is byte-identical to running the nest solo. The single-cursor law holds per chain - two chains are never multiplexed behind one cursor.</li>
+      </ul>
+
+      <p class="grp">Derive-first - the eth_call you don't need (<a href={rfc('0023')} rel="noopener">RFC-0023</a>, in progress)</p>
+      <ul class="rl">
+        <li>The Foundation reports that &gt;70% of subgraphs call <code>eth_call</code> - but most of those reads are <em>derivable</em> from the events a nest already indexes; subgraphs fetch them only because they have no incremental-view engine. Nuthatch does. <code>nuthatch recipe add total_supply</code> drops in a derived view that computes an ERC-20's <code>totalSupply()</code> as &#931; minted &#8722; &#931; burned from Transfer events - deterministic, free, and with no archive node. It derives what a subgraph pays an archive node to fetch. More recipes (reserves, holder counts), an immutable-metadata cache, and a verifiable eth_call fallback for the genuinely non-derivable reads follow.</li>
       </ul>
 
       <p class="grp">Release and footprint</p>
